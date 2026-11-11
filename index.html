@@ -17,23 +17,23 @@ img{max-width:100%}
 <style>
 /* Layout: one narrow reading column of chapters, like a video; each chapter = question → symbol plates → live drawing → derivation */
 :root{
-  color-scheme: dark;
-  --bg:#0a1424;
-  --screen:#0d1a2e;
-  --line:#22324b;
-  --muted:#8b9ab3;
-  --soft:#c6d0e0;
-  --fg:#e7ecf4;
-  --pi:#ff7a9a;
-  --f:#f5d76e;
-  --w:#8ee3f0;
-  --j:#a395ff;
-  --r:#6fd3b0;
-  --l:#f2a54a;
-  --c:#5b9bf0;
-  --btn:#dbe3ef;
-  --btn-hover:#ffffff;
-  --btn-shadow:#05090f;
+  color-scheme: light;
+  --bg:#ffffff;
+  --screen:#f5f7fa;
+  --line:#dde3ec;
+  --muted:#5f6b7d;
+  --soft:#2f3a4a;
+  --fg:#141b26;
+  --pi:#c2185b;
+  --f:#8f5b00;
+  --w:#00747f;
+  --j:#5e35b1;
+  --r:#16794f;
+  --l:#c25100;
+  --c:#1f63c6;
+  --btn:#1d2d44;
+  --btn-hover:#2f4668;
+  --btn-shadow:#b9c3d2;
   --font-body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --font-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --font-math:"Times New Roman", "STIX Two Math", serif;
@@ -56,7 +56,7 @@ strong{color:var(--fg)}
 .cast-label{font-size:13px;color:var(--muted);margin-top:4px}
 .cast a{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--muted);border-radius:999px;color:var(--fg);background:var(--line);text-decoration:none;font-size:14px;font-weight:600;box-shadow:0 2px 0 var(--btn-shadow);transition:background .15s, transform .08s}
 .cast a::after{content:"↓";font-size:12px;color:var(--soft)}
-.cast a:hover,.cast a:focus-visible{background:#2d4062;border-color:var(--fg)}
+.cast a:hover,.cast a:focus-visible{background:#cfd8e5;border-color:var(--fg)}
 .cast a:active{transform:translateY(2px);box-shadow:none}
 .scene{display:grid;gap:18px;padding-block:44px;border-top:1px solid var(--line)}
 .tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--muted)}
@@ -105,7 +105,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font
 th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
 th{font-weight:500;color:var(--muted);font-size:13px}
-tr.hit td{color:var(--fg);font-weight:700;background:rgba(255,122,154,.08)}
+tr.hit td{color:var(--fg);font-weight:700;background:rgba(194,24,91,.07)}
 .duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (max-width:680px){.duo{grid-template-columns:1fr}}
 .duo>div{min-width:0}
@@ -126,7 +126,7 @@ nav.series{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding-b
 nav.series .sname{color:var(--muted);margin-right:auto}
 nav.series a{color:var(--fg);text-decoration:none;padding:4px 12px;border-radius:999px;border:1px solid var(--muted);background:var(--line);font-weight:600}
 nav.series a:not([aria-current])::after{content:" →";color:var(--soft)}
-nav.series a:hover{background:#2d4062;border-color:var(--fg)}
+nav.series a:hover{background:#cfd8e5;border-color:var(--fg)}
 nav.series a[aria-current]{color:var(--bg);background:var(--fg);border-color:var(--fg);font-weight:600}
 .ladder{display:block;width:100%;height:auto;max-height:170px;padding:10px}
 .presets .lbl{color:var(--muted);font-size:13px}
@@ -134,8 +134,8 @@ nav.series a[aria-current]{color:var(--bg);background:var(--fg);border-color:var
 .listen{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center}
 .narr-note{color:var(--muted);font-size:13px;text-align:center}
 .narr-sec{justify-self:start;font-size:13px;padding:6px 12px}
-.narr-on{outline:2px solid var(--j);outline-offset:6px;border-radius:6px;background:rgba(163,149,255,.06)}
-.narr-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center;padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));background:var(--screen);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.35)}
+.narr-on{outline:2px solid var(--j);outline-offset:6px;border-radius:6px;background:rgba(94,53,177,.06)}
+.narr-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center;padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));background:var(--screen);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(20,27,38,.12)}
 .narr-bar .nb-info{display:flex;gap:10px;align-items:baseline;font-size:13px;color:var(--soft)}
 .nb-pos{color:var(--muted);font-variant-numeric:tabular-nums}
 .nb-ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -155,16 +155,16 @@ window.MathJax = {
     inlineMath:[['\\(','\\)']], displayMath:[['\\[','\\]']],
     packages:{'[+]':['color']},
     macros:{
-      cZ:['{\\color[RGB]{255,122,154}{#1}}',1],
-      cO:['{\\color[RGB]{245,215,110}{#1}}',1],
-      cG:['{\\color[RGB]{142,227,240}{#1}}',1],
-      cP:['{\\color[RGB]{255,122,154}{#1}}',1],
-      cF:['{\\color[RGB]{245,215,110}{#1}}',1],
-      cW:['{\\color[RGB]{142,227,240}{#1}}',1],
-      cJ:['{\\color[RGB]{163,149,255}{#1}}',1],
-      cR:['{\\color[RGB]{111,211,176}{#1}}',1],
-      cL:['{\\color[RGB]{242,165,74}{#1}}',1],
-      cC:['{\\color[RGB]{91,155,240}{#1}}',1]
+      cZ:['{\\color[RGB]{194,24,91}{#1}}',1],
+      cO:['{\\color[RGB]{143,91,0}{#1}}',1],
+      cG:['{\\color[RGB]{0,116,127}{#1}}',1],
+      cP:['{\\color[RGB]{194,24,91}{#1}}',1],
+      cF:['{\\color[RGB]{143,91,0}{#1}}',1],
+      cW:['{\\color[RGB]{0,116,127}{#1}}',1],
+      cJ:['{\\color[RGB]{94,53,177}{#1}}',1],
+      cR:['{\\color[RGB]{22,121,79}{#1}}',1],
+      cL:['{\\color[RGB]{194,81,0}{#1}}',1],
+      cC:['{\\color[RGB]{31,99,198}{#1}}',1]
     }
   },
   svg:{fontCache:'global'}
