@@ -144,6 +144,10 @@ nav.series a[aria-current]{color:var(--bg);background:var(--fg);border-color:var
 .nb-rate select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px 6px;font:inherit}
 .nb-msg{flex-basis:100%;text-align:center;font-size:13px;color:var(--l)}
 body.narr-open{padding-bottom:120px}
+.narr-unsup{max-width:34em;display:grid;gap:10px;margin-top:4px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--soft);background:var(--screen);border:1px solid var(--line);border-radius:6px;text-align:center}
+.unsup-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.btnlink{display:inline-flex;align-items:center;padding:8px 14px;border-radius:6px;background:var(--btn);color:var(--bg);font-weight:600;font-size:14px;text-decoration:none;box-shadow:0 2px 0 var(--btn-shadow)}
+.btnlink:hover{background:var(--btn-hover)}
 .narr-bar.emb{position:absolute;bottom:auto;top:0}
 .next{padding:20px;border:1px dashed var(--muted);border-radius:6px;display:grid;gap:8px;color:var(--soft)}
 footer{padding-block:32px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px}
@@ -951,7 +955,41 @@ window.NARR = [
 (function(){
   const S = window.speechSynthesis;
   const DATA = window.NARR || [];
-  if (!S || !window.SpeechSynthesisUtterance || !DATA.length) return;
+  if (!DATA.length) return;
+  if (!S || !window.SpeechSynthesisUtterance){
+    /* in-app browsers (e.g. Android WebView) have no speech synthesis: keep the button, explain, offer a real browser */
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    const url = location.href.split('#')[0];
+    const android = /Android/i.test(navigator.userAgent);
+    const openHref = android ? 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end' : url;
+    const box = document.createElement('div'); box.className = 'listen';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'narr-all';
+    btn.innerHTML = '<span class="ic" aria-hidden="true">▶</span>처음부터 듣기';
+    const note = document.createElement('span'); note.className = 'narr-note';
+    note.textContent = '기기 음성으로 읽고, 읽는 곳으로 화면이 따라갑니다.';
+    const msg = document.createElement('div'); msg.className = 'narr-unsup'; msg.hidden = true;
+    msg.innerHTML = '<p>이 앱 화면에서는 듣기 기능을 쓸 수 없습니다. 크롬이나 사파리 같은 브라우저에서 열면 들을 수 있습니다.</p>' +
+      '<div class="unsup-actions"><a class="btnlink" target="_blank" rel="noopener">브라우저에서 열기</a><button type="button" class="alt">주소 복사</button></div>';
+    msg.querySelector('a').href = openHref;
+    const cp = msg.querySelector('button');
+    cp.addEventListener('click', () => {
+      const done = () => { cp.textContent = '복사했습니다'; };
+      const legacy = () => {
+        const t = document.createElement('textarea'); t.value = url; t.setAttribute('readonly', '');
+        t.style.position = 'absolute'; t.style.left = '-9999px'; document.body.appendChild(t); t.select();
+        try { document.execCommand('copy'); done(); } catch(e){ cp.textContent = url; }
+        document.body.removeChild(t);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, legacy);
+      else legacy();
+    });
+    btn.addEventListener('click', () => { msg.hidden = !msg.hidden; });
+    box.appendChild(btn); box.appendChild(note); box.appendChild(msg);
+    const h1 = hero.querySelector('h1');
+    if (h1) h1.insertAdjacentElement('afterend', box); else hero.appendChild(box);
+    return;
+  }
   const emb = () => !!window.__embedOn;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
