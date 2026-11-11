@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>스미스 차트는 무엇을 그리는 걸까 · 무선 공식, 수학으로 보기 3편</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<style>
+/* Layout: one narrow reading column of chapters, like a video; each chapter = question → symbol plates → live drawing → derivation */
+:root{
+  color-scheme: light;
+  --bg:#ffffff;
+  --screen:#f5f7fa;
+  --line:#dde3ec;
+  --muted:#5f6b7d;
+  --soft:#2f3a4a;
+  --fg:#141b26;
+  --pi:#c2185b;
+  --f:#8f5b00;
+  --w:#00747f;
+  --j:#5e35b1;
+  --r:#16794f;
+  --l:#c25100;
+  --c:#1f63c6;
+  --btn:#1d2d44;
+  --btn-hover:#2f4668;
+  --btn-shadow:#b9c3d2;
+  --font-body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-math:"Times New Roman", "STIX Two Math", serif;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.75;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 48px}
+main{max-width:760px;margin:0 auto}
+h1,h2,h3{text-wrap:balance;line-height:1.35;margin:0}
+p{margin:0}
+a{color:var(--w)}
+strong{color:var(--fg)}
+.hero{padding-block:56px 28px;display:grid;gap:18px;text-align:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;color:var(--muted)}
+.hero h1{font-size:clamp(26px,5vw,36px);font-weight:700}
+.hero .big{font-size:clamp(26px,6.4vw,44px);padding-block:10px;overflow-x:auto}
+.hero .big2{font-size:clamp(16px,4.2vw,32px)}
+.hero .lede{color:var(--soft);max-width:58ch;margin:0 auto}
+.qs{display:grid;gap:6px;justify-content:center;padding:0;margin:0;list-style:none;color:var(--fg);font-weight:600}
+.qs li::before{content:"Q. ";color:var(--muted);font-weight:400}
+.cast{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0;margin:6px 0 0;list-style:none}
+.cast-label{font-size:13px;color:var(--muted);margin-top:4px}
+.cast a{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--muted);border-radius:999px;color:var(--fg);background:var(--line);text-decoration:none;font-size:14px;font-weight:600;box-shadow:0 2px 0 var(--btn-shadow);transition:background .15s, transform .08s}
+.cast a::after{content:"↓";font-size:12px;color:var(--soft)}
+.cast a:hover,.cast a:focus-visible{background:#cfd8e5;border-color:var(--fg)}
+.cast a:active{transform:translateY(2px);box-shadow:none}
+.scene{display:grid;gap:18px;padding-block:44px;border-top:1px solid var(--line)}
+.tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--muted)}
+.scene h2{font-size:clamp(21px,3.6vw,26px);font-weight:700}
+.scene h2 em{font-style:normal}
+.ask{font-size:17px;font-weight:600;color:var(--fg);padding-left:14px;border-left:3px solid var(--muted)}
+.prose{display:grid;gap:12px;max-width:65ch;color:var(--soft)}
+.math{overflow-x:auto;overflow-y:hidden;padding-block:4px;color:var(--fg)}
+.plates{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.plate{display:grid;grid-template-columns:44px minmax(0,1fr);gap:2px 12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--screen);min-width:0}
+.plate .s{grid-row:span 3;font-family:var(--font-math);font-style:italic;font-size:32px;line-height:1.1;text-align:center}
+.plate .rd{font-weight:600;font-size:15px}
+.plate .rd small{font-weight:400;color:var(--muted);font-size:13px;margin-left:6px}
+.plate .o{font-size:13.5px;color:var(--soft);line-height:1.6}
+.plate .u{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+.stage{background:var(--screen);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.stage canvas{display:block;width:100%}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);font-size:14px}
+.controls label{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.controls input[type=range]{width:min(220px,56vw);accent-color:var(--fg)}
+.controls select,.controls input[type=number]{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px 6px;font:inherit}
+button{font:inherit;font-size:14px;font-weight:600;line-height:1.2;color:var(--bg);background:var(--btn);border:0;border-radius:6px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 0 var(--btn-shadow);transition:background .15s, transform .08s}
+button:hover{background:var(--btn-hover)}
+button:active{transform:translateY(2px);box-shadow:none}
+button.alt{color:var(--fg);background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted)}
+button.alt:hover{background:var(--line)}
+button .ic{font-size:12px;opacity:.85}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--w);outline-offset:2px}
+.read{font-family:var(--font-body);font-variant-numeric:tabular-nums;font-size:13.5px;color:var(--fg)}
+.read.lines{display:grid;gap:2px}
+.state{display:flex;align-items:baseline;gap:10px;color:var(--muted);font-size:13px;cursor:default}
+.chips{display:flex;gap:4px}
+.chips b{font-family:var(--font-math);font-style:italic;font-weight:400;font-size:18px;padding:0 6px;color:var(--muted);opacity:.45;border-bottom:2px solid transparent}
+.chips b.on{color:var(--j);opacity:1;border-bottom-color:var(--j)}
+.answer{display:block;padding:12px 16px;background:var(--screen);border-left:3px solid var(--k, var(--muted));font-weight:600;color:var(--fg)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:680px){.cards{grid-template-columns:1fr}}
+.card{display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;padding:16px;background:var(--screen);border:1px solid var(--line);border-radius:6px;min-width:0}
+.card .top{display:flex;align-items:center;gap:12px}
+.card .top svg{width:56px;height:56px;flex:none}
+.card h3{font-size:16px}
+.card p{font-size:14.5px;color:var(--soft)}
+.card .math{font-size:15px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:15px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:500;color:var(--muted);font-size:13px}
+tr.hit td{color:var(--fg);font-weight:700;background:rgba(194,24,91,.07)}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:680px){.duo{grid-template-columns:1fr}}
+.duo>div{min-width:0}
+.duo>div+div{border-left:1px solid var(--line)}
+@media (max-width:680px){.duo>div+div{border-left:0;border-top:1px solid var(--line)}}
+.cap{padding:10px 14px 0;font-size:13px;color:var(--muted)}
+.status{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.pill{font-size:13px;font-weight:600;padding:2px 10px;border-radius:999px;border:1px solid currentColor}
+.calc{display:grid;gap:2px;padding:14px;border-top:1px solid var(--line)}
+.calc div{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr);gap:12px;font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:14px}
+.calc div span:first-child{color:var(--muted)}
+.calc div.end span{color:var(--pi);font-weight:600}
+.guide{display:grid;gap:4px;margin:0;padding:12px 14px;border-top:1px solid var(--line);font-size:14px;line-height:1.65}
+.guide div{display:grid;grid-template-columns:3.2em minmax(0,1fr);gap:8px}
+.guide dt{color:var(--muted);font-weight:600}
+.guide dd{margin:0;color:var(--soft)}
+nav.series{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding-block:14px;border-bottom:1px solid var(--line);font-size:13.5px}
+nav.series .sname{color:var(--muted);margin-right:auto}
+nav.series a{color:var(--fg);text-decoration:none;padding:4px 12px;border-radius:999px;border:1px solid var(--muted);background:var(--line);font-weight:600}
+nav.series a:not([aria-current])::after{content:" →";color:var(--soft)}
+nav.series a:hover{background:#cfd8e5;border-color:var(--fg)}
+nav.series a[aria-current]{color:var(--bg);background:var(--fg);border-color:var(--fg);font-weight:600}
+.ladder{display:block;width:100%;height:auto;max-height:170px;padding:10px}
+.presets .lbl{color:var(--muted);font-size:13px}
+.presets button{font-size:13px;padding:6px 11px}
+.listen{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center}
+.narr-note{color:var(--muted);font-size:13px;text-align:center}
+.narr-sec{justify-self:start;font-size:13px;padding:6px 12px}
+.narr-on{outline:2px solid var(--j);outline-offset:6px;border-radius:6px;background:rgba(94,53,177,.06)}
+.narr-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center;padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));background:var(--screen);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(20,27,38,.12)}
+.narr-bar .nb-info{display:flex;gap:10px;align-items:baseline;font-size:13px;color:var(--soft)}
+.nb-pos{color:var(--muted);font-variant-numeric:tabular-nums}
+.nb-ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nb-ctrl button{min-width:40px;justify-content:center;padding:7px 10px}
+.nb-rate{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+.nb-rate select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px 6px;font:inherit}
+.nb-msg{flex-basis:100%;text-align:center;font-size:13px;color:var(--l)}
+body.narr-open{padding-bottom:120px}
+.narr-unsup{max-width:34em;display:grid;gap:10px;margin-top:4px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--soft);background:var(--screen);border:1px solid var(--line);border-radius:6px;text-align:center}
+.unsup-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.btnlink{display:inline-flex;align-items:center;padding:8px 14px;border-radius:6px;background:var(--btn);color:var(--bg);font-weight:600;font-size:14px;text-decoration:none;box-shadow:0 2px 0 var(--btn-shadow)}
+.btnlink:hover{background:var(--btn-hover)}
+.tnote{font-size:13px;color:var(--muted);margin:8px 0 0;white-space:normal}
+table.stack thead{display:none}
+table.stack,table.stack tbody{display:block}
+table.stack tr{display:block;margin-bottom:10px;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--screen)}
+table.stack td{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:4px 0;border:0;text-align:right;white-space:normal}
+table.stack td::before{content:attr(data-label);flex:none;max-width:45%;color:var(--muted);font-size:13px;font-weight:400;text-align:left}
+table.stack td:first-child{justify-content:flex-start;font-weight:700;text-align:left}
+table.stack td:first-child::before{content:none}
+@media (max-width:560px){
+  .narr-bar{gap:4px 8px;padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px))}
+  .narr-bar .nb-info{flex-basis:100%;justify-content:center;font-size:12px;line-height:1.2}
+  .nb-ctrl{gap:6px;flex-wrap:nowrap}
+  .nb-ctrl button{min-width:36px;padding:6px 8px}
+  .nb-rate{font-size:0;gap:0}
+  .nb-rate select{font-size:13px;padding:2px 4px}
+  body.narr-open{padding-bottom:84px}
+}
+.narr-bar.emb{position:absolute;bottom:auto;top:0}
+.next{padding:20px;border:1px dashed var(--muted);border-radius:6px;display:grid;gap:8px;color:var(--soft)}
+footer{padding-block:32px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px}
+</style>
+<script>
+window.MathJax = {
+  loader:{load:['[tex]/color']},
+  tex:{
+    inlineMath:[['\\(','\\)']], displayMath:[['\\[','\\]']],
+    packages:{'[+]':['color']},
+    macros:{
+      cZ:['{\\color[RGB]{194,24,91}{#1}}',1],
+      cO:['{\\color[RGB]{143,91,0}{#1}}',1],
+      cG:['{\\color[RGB]{0,116,127}{#1}}',1],
+      cP:['{\\color[RGB]{194,24,91}{#1}}',1],
+      cF:['{\\color[RGB]{143,91,0}{#1}}',1],
+      cW:['{\\color[RGB]{0,116,127}{#1}}',1],
+      cJ:['{\\color[RGB]{94,53,177}{#1}}',1],
+      cR:['{\\color[RGB]{22,121,79}{#1}}',1],
+      cL:['{\\color[RGB]{194,81,0}{#1}}',1],
+      cC:['{\\color[RGB]{31,99,198}{#1}}',1]
+    }
+  },
+  svg:{fontCache:'global'}
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+</head>
+<body>
+<main>
+  <nav class="series" aria-label="연작"><span class="sname">무선 공식, 수학으로 보기</span><a href="index.html">1편 공진 공식</a><a href="02-impedance-swr.html">2편 임피던스와 SWR</a><a href="03-smith-chart.html" aria-current="page">3편 스미스 차트</a></nav>
+  <header class="hero">
+    <div class="eyebrow">무선 공식, 수학으로 보기 · 3편</div>
+    <h1>스미스 차트는 무엇을 그리는 걸까</h1>
+    <div class="big math big2">\[ \cG{\Gamma} = \frac{\cZ{z}-1}{\cZ{z}+1}, \quad \cZ{z} = \frac{\cZ{Z}}{\cO{Z_0}} \]</div>
+    <p class="lede">NanoVNA를 안테나에 연결하면 원과 호가 가득한 차트 위에 점 하나가 찍힙니다. 이 차트는 2편의 Γ 평면 위에 임피던스 눈금을 겹쳐 그린 것입니다.</p>
+    <ul class="qs">
+      <li>NanoVNA는 무엇을 재고 있을까?</li>
+      <li>스미스 차트의 원과 호는 어디서 왔을까?</li>
+      <li>케이블을 붙이면 왜 값이 바뀔까?</li>
+    </ul>
+    <p class="lede">2편의 반사계수 Γ에서 시작합니다.</p>
+    <p class="cast-label">목차 · 누르면 그 장으로 이동합니다</p>
+    <ul class="cast" aria-label="목차">
+      <li><a href="#s1">1 VNA가 재는 것</a></li>
+      <li><a href="#s2">2 평면을 원판으로</a></li>
+      <li><a href="#s3">3 원이 되는 이유</a></li>
+      <li><a href="#s4">4 차트 읽기</a></li>
+      <li><a href="#s5">5 주파수 스윕</a></li>
+      <li><a href="#s6">6 케이블과 회전</a></li>
+      <li><a href="#s7">마무리</a></li>
+    </ul>
+  </header>
+
+  <!-- 1 -->
+  <section class="scene" id="s1">
+    <div class="tag">1 · 측정</div>
+    <h2>VNA가 재는 것은 Γ 하나입니다</h2>
+    <p class="ask">SWR, R + jX, 스미스 차트는 각각 따로 재는 값일까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s" style="font-size:22px">VNA</div><div class="rd">vector network analyzer</div><div class="o">벡터 네트워크 분석기. 반사파의 크기와 위상을 함께 잽니다.</div><div class="u">NanoVNA는 소형 VNA의 한 종류</div></div>
+      <div class="plate"><div class="s" style="color:var(--w)">S<sub>11</sub></div><div class="rd">에스 일일 <small>S-parameter</small></div><div class="o">포트 1로 보낸 파에 대해 포트 1로 돌아온 파의 비. 곧 2편의 반사계수 Γ입니다.</div><div class="u">단위 없음 · 흔히 dB로 표시</div></div>
+    </div>
+    <div class="prose">
+      <p>VNA는 포트에서 알고 있는 신호를 내보내고, 안테나에서 되돌아온 신호를 받습니다. 두 신호의 비를 크기뿐 아니라 위상까지 재므로 결과는 화살표 하나, 즉 2편의 반사계수 Γ입니다. 이 값을 S<sub>11</sub>이라고 부르며, 위상까지 잰다는 점이 이름의 "벡터"입니다. 크기만 재는 SWR 미터는 |Γ|만 알 수 있어 R과 X를 구분하지 못합니다.</p>
+      <p>NanoVNA 화면에 띄우는 여러 그래프는 모두 같은 Γ에서 계산한 값입니다.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>화면 표시</th><th>계산식</th><th>보여 주는 것</th></tr></thead>
+        <tbody>
+          <tr><td>LOGMAG</td><td>20 log₁₀|Γ| dB</td><td>반사의 크기 (−RL)</td></tr>
+          <tr><td>PHASE</td><td>∠Γ</td><td>반사 위상</td></tr>
+          <tr><td>SWR</td><td>(1+|Γ|)/(1−|Γ|)</td><td>정재파비</td></tr>
+          <tr><td>POLAR</td><td>Γ 그대로</td><td>Γ 평면 위의 점</td></tr>
+          <tr class="hit"><td>SMITH</td><td>Z₀(1+Γ)/(1−Γ)</td><td>R + jX와 그 위치</td></tr>
+        </tbody>
+      </table>
+      <p class="tnote">표시 이름과 메뉴 위치는 펌웨어마다 조금씩 다릅니다.</p>
+    </div>
+    <div class="prose">
+      <p>측정 전에 하는 교정(SOL)은 Γ 평면의 기준점 세 개를 기기에 알려 주는 일입니다. 단락(Short)은 Γ = −1, 개방(Open)은 Γ = +1, 50 Ω 부하(Load)는 Γ = 0입니다. 기기 내부와 연결 케이블이 만드는 오차를 이 세 점을 기준으로 지웁니다. 교정 뒤 포트를 열어 둔 채 재면 전 대역에서 LOGMAG가 0 dB 근처에 있고, 스미스 차트의 점은 오른쪽 끝에 머뭅니다.</p>
+    </div>
+    <div class="stage">
+      <canvas id="cvA" aria-label="Γ 평면 위의 화살표 하나와 그 점에서 계산한 측정값"></canvas>
+      <div class="controls">
+        <label for="mA">|Γ| <input type="range" id="mA" min="0" max="100" value="54" style="width:150px"></label>
+        <label for="tA">Γ 각도 <input type="range" id="tA" min="-180" max="180" value="89" style="width:150px"></label>
+      </div>
+      <div class="calc" id="calcA" aria-live="polite"></div>
+      <dl class="guide"><div><dt>조작</dt><dd>|Γ|와 Γ 각도로 반사 화살표를 정합니다.</dd></div><div><dt>관찰</dt><dd>화살표 하나를 바꾸면 아래의 LOGMAG, PHASE, SWR, R + jX가 함께 바뀝니다. 각도만 바꾸면 SWR은 그대로이고 R + jX만 바뀝니다.</dd></div><div><dt>의미</dt><dd>VNA의 여러 화면은 같은 측정값 Γ를 다른 방식으로 보여 준 것입니다.</dd></div></dl>
+    </div>
+    <div class="answer" style="--k:var(--w)">VNA는 Γ 하나를 잽니다. SWR, 반사 손실, R + jX, 스미스 차트는 모두 그 Γ를 다르게 나타낸 것입니다.</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="scene" id="s2">
+    <div class="tag">2 · 변환</div>
+    <h2>임피던스 평면을 원판 안으로 옮깁니다</h2>
+    <p class="ask">끝없이 넓은 R–X 평면을 어떻게 원 하나에 담을까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s" style="color:var(--pi)">z</div><div class="rd">normalized impedance</div><div class="o">정규화 임피던스. Z를 Z₀로 나눈 값으로, 50 Ω이 1이 됩니다.</div><div class="u">단위 없음</div></div>
+      <div class="plate"><div class="s"><span style="color:var(--r)">r</span>, x</div><div class="rd">normalized resistance · reactance</div><div class="o">z = r + jx. r은 R/Z₀, x는 X/Z₀입니다.</div><div class="u">단위 없음</div></div>
+    </div>
+    <div class="prose">
+      <p>먼저 모든 임피던스를 Z₀로 나눕니다. 50 Ω 계통에서 28 + j42 Ω은 z = 0.56 + j0.84가 됩니다. 이렇게 하면 50 Ω 계통이든 75 Ω 계통이든 같은 차트를 쓸 수 있고, 정합점은 언제나 z = 1입니다.</p>
+      <div class="math">\[ \cZ{z} = \frac{\cZ{Z}}{\cO{Z_0}} = \cR{r} + \cJ{j}x \]</div>
+      <p>2편의 반사계수 식을 z로 쓰면 더 간단해집니다.</p>
+      <div class="math">\[ \cG{\Gamma} = \frac{\cZ{Z} - \cO{Z_0}}{\cZ{Z} + \cO{Z_0}} = \frac{\cZ{z}-1}{\cZ{z}+1} \]</div>
+      <p>세 점을 넣어 보면 z = 1은 Γ = 0(중심), z = 0은 Γ = −1(왼쪽 끝), z가 무한히 커지면 Γ = +1(오른쪽 끝)입니다. r ≥ 0이면 z − 1까지의 거리가 z + 1까지의 거리보다 길 수 없으므로 |Γ| ≤ 1입니다. 저항이 음수가 아닌 모든 임피던스, 즉 R–X 평면의 오른쪽 절반 전체가 반지름 1인 원 안으로 들어갑니다.</p>
+    </div>
+    <div class="stage">
+      <canvas id="cvB" aria-label="왼쪽 R–X 평면의 직선과 오른쪽 Γ 원판의 원이 대응하는 그림"></canvas>
+      <div class="controls">
+        <label for="rB">r <input type="range" id="rB" min="0" max="500" value="50" style="width:150px"></label>
+        <label for="xB">x <input type="range" id="xB" min="-500" max="500" value="100" style="width:150px"></label>
+      </div>
+      <div class="controls presets">
+        <span class="lbl">점 예</span>
+        <button type="button" class="alt" data-r="100" data-x="0">정합 z = 1</button>
+        <button type="button" class="alt" data-r="0" data-x="0">단락 z = 0</button>
+        <button type="button" class="alt" data-r="56" data-x="84">28 + j42 Ω</button>
+        <button type="button" class="alt" data-r="200" data-x="-100">100 − j50 Ω</button>
+      </div>
+      <div class="status"><div class="read lines" id="readB"></div></div>
+      <dl class="guide"><div><dt>조작</dt><dd>r과 x를 바꾸거나 점 예를 고릅니다.</dd></div><div><dt>관찰</dt><dd>왼쪽의 초록 세로선(r 일정)은 오른쪽에서 초록 원이 되고, 보라 가로선(x 일정)은 보라 호가 됩니다. r을 키우면 초록 원이 작아지며 오른쪽 끝으로 몰립니다. 모든 원과 호는 오른쪽 끝 한 점을 지납니다.</dd></div><div><dt>의미</dt><dd>스미스 차트는 R–X 평면의 격자를 Γ = (z−1)/(z+1)로 옮겨 그린 것입니다.</dd></div></dl>
+    </div>
+    <div class="answer" style="--k:var(--pi)">스미스 차트는 Γ 평면 위에 R–X 격자를 옮겨 그린 지도입니다. 점의 위치가 Γ이고, 그 점을 지나는 원과 호의 눈금이 r과 x입니다.</div>
+  </section>
+
+  <!-- 3 -->
+  <section class="scene" id="s3">
+    <div class="tag">3 · 원</div>
+    <h2>직선이 원으로 바뀌는 이유</h2>
+    <p class="ask">왜 하필 원과 호일까?</p>
+    <div class="prose">
+      <p>변환을 거꾸로 풀면 z = (1+Γ)/(1−Γ)입니다. Γ = u + jv로 두고 분모의 켤레복소수 (1−u) + jv를 분자와 분모에 곱해 실수부와 허수부를 나누면 다음과 같습니다.</p>
+      <div class="math">\[ \cR{r} = \frac{1-u^2-v^2}{(1-u)^2+v^2} \]\[ x = \frac{2v}{(1-u)^2+v^2} \]</div>
+      <p>r을 정해 두고 첫째 식을 정리하면, 즉 양변에 분모를 곱하고 u와 v에 대해 완전제곱을 만들면 원의 방정식이 나옵니다. 둘째 식도 같은 방법으로 정리합니다.</p>
+      <div class="math">\[ \Big(u - \frac{\cR{r}}{\cR{r}+1}\Big)^2 + v^2 = \Big(\frac{1}{\cR{r}+1}\Big)^2 \]\[ (u-1)^2 + \Big(v - \frac{1}{x}\Big)^2 = \Big(\frac{1}{x}\Big)^2 \]</div>
+      <p>r이 일정한 점들은 중심이 가로축 위 (r/(r+1), 0)이고 반지름이 1/(r+1)인 원입니다. r이 커질수록 원은 작아지며 오른쪽 끝으로 몰립니다. x가 일정한 점들은(x ≠ 0) 중심이 (1, 1/x)이고 반지름이 1/|x|인 원입니다. 이 원의 중심은 원판 밖에 있으므로 원판 안에 들어온 일부만 보이고, 그래서 호로 그려집니다. x &gt; 0이면 위쪽, x &lt; 0이면 아래쪽이며, x = 0이면 반지름이 한없이 커져 가로축이 됩니다.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>r</th><th>원의 중심 u</th><th>반지름</th><th>지나는 점</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>1</td><td>바깥 원 자체</td></tr>
+          <tr><td>0.5</td><td>1/3</td><td>2/3</td><td>Γ = −1/3 (25 Ω)</td></tr>
+          <tr class="hit"><td>1</td><td>1/2</td><td>1/2</td><td>Γ = 0 (50 Ω, 중심)</td></tr>
+          <tr><td>2</td><td>2/3</td><td>1/3</td><td>Γ = 1/3 (100 Ω)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>두 원 모두 u = 1, v = 0, 즉 오른쪽 끝을 지납니다. 직선은 무한히 먼 곳에서 서로 만나는데, 그 무한대가 Γ = +1 한 점으로 옮겨지기 때문입니다. Γ = (z−1)/(z+1)처럼 일차식을 일차식으로 나눈 변환은 직선과 원을 언제나 원(또는 직선)으로 옮기는 성질이 있으며, 뫼비우스 변환이라고 부릅니다.</p>
+      <p>이 성질은 1장의 교정과도 이어집니다. 기기 내부의 오차(방향성, 신호원 정합, 반사 추적)도 실제 Γ를 같은 꼴의 분수식으로 바꿔 놓는데, 이런 변환은 세 점의 대응이 정해지면 하나로 결정됩니다. 교정 표준이 단락, 개방, 부하 세 개인 이유입니다.</p>
+    </div>
+    <div class="answer" style="--k:var(--r)">r이 일정한 선은 중심이 가로축 위에 있는 원, x가 일정한 선은 중심이 u = 1 위에 있는 원의 일부가 됩니다. 그래서 스미스 차트는 원과 호로 이루어집니다.</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="scene" id="s4">
+    <div class="tag">4 · 읽기</div>
+    <h2>점 하나에서 네 가지를 읽습니다</h2>
+    <p class="ask">NanoVNA에 28 + j42 Ω이 찍혔다면 무엇을 알 수 있을까?</p>
+    <div class="prose">
+      <p>완성된 차트에 점을 찍으면 위치만으로 다음을 읽을 수 있습니다.</p>
+      <p><strong>위아래:</strong> 가로축 위쪽은 x &gt; 0(유도성), 아래쪽은 x &lt; 0(용량성), 가로축 위는 x = 0(공진)입니다.<br><strong>지나는 원과 호:</strong> 점을 지나는 r 원과 x 호의 눈금이 정규화된 저항과 리액턴스입니다. Z₀를 곱하면 Ω 값이 됩니다.<br><strong>중심까지의 거리:</strong> |Γ|, 곧 SWR입니다. 중심을 둘러싼 같은 원 위의 점은 R과 X가 달라도 SWR이 같습니다.<br><strong>중심에서 본 각도:</strong> 반사 위상입니다.</p>
+      <p>28 + j42 Ω을 예로 들면 z = 0.56 + j0.84입니다. 점은 위쪽에 있으므로 유도성이고, r = 0.5 원보다 조금 안쪽에 있으므로 저항이 Z₀보다 작습니다. 중심까지의 거리는 |Γ| ≈ 0.54, SWR은 약 3.3, 반사 손실은 약 5.4 dB입니다.</p>
+    </div>
+    <div class="stage">
+      <canvas id="cvC" aria-label="눈금이 있는 스미스 차트 위의 점과 그 점을 지나는 SWR 원"></canvas>
+      <div class="controls">
+        <label for="rC">R <input type="range" id="rC" min="0" max="250" value="28" style="width:150px"></label>
+        <label for="xC">X <input type="range" id="xC" min="-250" max="250" value="42" style="width:150px"></label>
+      </div>
+      <div class="controls presets">
+        <span class="lbl">안테나 예</span>
+        <button type="button" class="alt" data-r="28" data-x="42">28 + j42 Ω</button>
+        <button type="button" class="alt" data-r="50" data-x="0">50 Ω 정합</button>
+        <button type="button" class="alt" data-r="36" data-x="0">1/4파장 버티컬</button>
+        <button type="button" class="alt" data-r="80" data-x="45">길게 자른 다이폴</button>
+        <button type="button" class="alt" data-r="20" data-x="-100">짧은 버티컬</button>
+      </div>
+      <div class="status"><div class="read lines" id="readC"></div></div>
+      <dl class="guide"><div><dt>조작</dt><dd>안테나의 R과 X를 바꾸거나 안테나 예를 고릅니다.</dd></div><div><dt>관찰</dt><dd>분홍 점이 임피던스, 점선 원이 그 점과 SWR이 같은 점들입니다. X를 바꾸면 점이 초록 r 원을 따라 움직이고, R을 바꾸면 보라 x 호를 따라 움직입니다.</dd></div><div><dt>의미</dt><dd>점의 위치 하나가 R, X, |Γ|, SWR, 반사 위상을 모두 담고 있습니다.</dd></div></dl>
+    </div>
+    <div class="answer" style="--k:var(--pi)">점의 위아래는 유도성과 용량성, 지나는 원과 호는 R과 X, 중심까지의 거리는 SWR, 중심에서 본 각도는 반사 위상입니다.</div>
+  </section>
+
+  <!-- 5 -->
+  <section class="scene" id="s5">
+    <div class="tag">5 · 스윕</div>
+    <h2>주파수를 바꾸면 점이 궤적을 그립니다</h2>
+    <p class="ask">대역을 훑으면 왜 점이 아니라 곡선이 나올까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s" style="color:var(--f)">f₀</div><div class="rd">resonant frequency</div><div class="o">공진 주파수. 리액턴스가 0이 되는 주파수입니다.</div><div class="u">Hz (헤르츠)</div></div>
+      <div class="plate"><div class="s">Q</div><div class="rd">quality factor</div><div class="o">선택도. 공진 근처에서 리액턴스가 얼마나 빨리 변하는지를 나타내며, 클수록 대역폭이 좁습니다.</div><div class="u">단위 없음</div></div>
+    </div>
+    <div class="prose">
+      <p>안테나의 임피던스는 주파수에 따라 변합니다. 공진 근처의 다이폴은 1편의 직렬 RLC 회로처럼 움직이며, 리액턴스를 Q로 쓰면 다음과 같습니다.</p>
+      <div class="math">\[ \cZ{Z}(\cF{f}) \approx \cR{R} + \cJ{j}\,\cR{R}\,Q\Big(\frac{\cF{f}}{\cF{f_0}} - \frac{\cF{f_0}}{\cF{f}}\Big) \]</div>
+      <p>R이 거의 일정하므로 점은 3장의 r 원 위를 움직입니다. f₀보다 낮은 주파수에서는 X &lt; 0이라 아래쪽, 높은 주파수에서는 위쪽에 있고, f₀에서 가로축을 지납니다. VNA는 수백 개의 주파수에서 이 점을 찍어 이은 궤적을 보여 줍니다.</p>
+      <p>여기서 실용적인 규칙이 하나 나옵니다. 같은 주파수에서 볼 때 안테나가 길면 f₀가 내려가므로 그 주파수는 f₀보다 높은 쪽이 되어 점이 위쪽(유도성)에 찍힙니다. 짧으면 아래쪽(용량성)입니다. 실제 안테나는 R도 주파수에 따라 조금씩 변해 궤적이 원에서 약간 벗어나고, X = 0인 주파수와 SWR이 가장 낮은 주파수가 조금 어긋나기도 합니다.</p>
+      <p>이 규칙은 다이폴이나 1/4파장 버티컬처럼 급전점에서 직렬 공진하는 안테나에 맞습니다. EFHW처럼 급전점이 병렬 공진에 가까운 안테나는 위아래 관계가 반대로 나타날 수 있습니다.</p>
+    </div>
+    <div class="stage">
+      <canvas id="cvD" aria-label="주파수 스윕에 따른 스미스 차트 궤적과 SWR 곡선"></canvas>
+      <div class="controls">
+        <label for="fD">공진 주파수 f₀ <input type="range" id="fD" min="6950" max="7250" value="7050" step="5" style="width:140px"></label>
+        <label for="qD">Q <input type="range" id="qD" min="4" max="30" value="12" style="width:110px"></label>
+        <label for="rD">R <input type="range" id="rD" min="30" max="100" value="65" style="width:110px"></label>
+      </div>
+      <div class="controls">
+        <label for="mD">마커 주파수 <input type="range" id="mD" min="6900" max="7300" value="7150" step="5" style="width:180px"></label>
+      </div>
+      <div class="status"><div class="read lines" id="readD"></div></div>
+      <dl class="guide"><div><dt>조작</dt><dd>6.9~7.3 MHz를 훑는다고 보고 공진 주파수 f₀, Q, R을 바꿉니다. 마커 주파수로 궤적 위의 한 점을 고릅니다.</dd></div><div><dt>관찰</dt><dd>청록 궤적이 가로축을 지나는 초록 점이 f₀입니다. f₀를 낮추면(안테나를 길게 하면) 마커가 위쪽으로, 높이면 아래쪽으로 갑니다. Q를 키우면 같은 주파수 범위에서 궤적이 원을 따라 더 길게 퍼지고, 아래 SWR 곡선이 좁아집니다.</dd></div><div><dt>의미</dt><dd>스윕 궤적의 가로축 교차점이 공진, 궤적이 중심에 가장 가까운 곳이 SWR 최소, 궤적이 퍼지는 빠르기가 대역폭입니다.</dd></div></dl>
+    </div>
+    <div class="answer" style="--k:var(--f)">스윕 궤적이 가로축을 지나는 곳이 공진 주파수입니다. 운용 주파수의 점이 위쪽이면 안테나가 길고, 아래쪽이면 짧습니다(급전점에서 잰 경우).</div>
+  </section>
+
+  <!-- 6 -->
+  <section class="scene" id="s6">
+    <div class="tag">6 · 케이블</div>
+    <h2>케이블을 거치면 점이 중심을 돌아갑니다</h2>
+    <p class="ask">안테나는 그대로인데 케이블을 바꾸면 R + jX가 왜 달라질까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s">ℓ</div><div class="rd">length</div><div class="o">급전선의 길이. 회전량은 케이블 속 파장 단위의 길이로 정해집니다.</div><div class="u">m 또는 λ</div></div>
+      <div class="plate"><div class="s" style="font-size:22px">VF</div><div class="rd">velocity factor</div><div class="o">속도 계수. 케이블 속에서 파가 진행하는 속도와 빛의 속도의 비입니다.</div><div class="u">단위 없음 · 동축 약 0.66~0.85</div></div>
+    </div>
+    <div class="prose">
+      <p>2편 4장에서 안테나로부터 d만큼 떨어진 곳의 반사 화살표는 e<sup>−j2βd</sup>만큼 회전했습니다. 무선실 쪽 케이블 끝에서 VNA가 보는 Γ도 마찬가지입니다.</p>
+      <div class="math">\[ \cG{\Gamma_{\text{in}}} = \cG{\Gamma_L}\, e^{-\cJ{j}2\cO{\beta}\ell} \]</div>
+      <p>크기 |Γ|는 그대로이고 각도만 2βℓ만큼 줄어듭니다. 차트 위에서는 점이 중심을 둘러싼 SWR 원을 따라 시계 방향으로 돕니다. 그래서 손실이 없는 케이블이라면 길이와 상관없이 SWR은 같지만 R + jX는 달라집니다. 회전각은 케이블 속 파장 λ × VF를 기준으로 정해집니다.</p>
+      <div class="math">\[ 2\cO{\beta}\ell = 720^\circ \times \frac{\ell}{\lambda \cdot \text{VF}} \]</div>
+      <p>예를 들어 7.1 MHz의 파장은 약 42.2 m이고, VF 0.66인 동축 속에서는 약 27.9 m입니다. 이 케이블 10 m는 약 0.36파장이므로 Γ는 약 258° 회전합니다.</p>
+      <p>특별한 길이가 두 가지 있습니다. 1/4파장이면 180° 회전해 Γ의 부호가 바뀌고 z가 1/z로 바뀝니다. 100 Ω이 25 Ω으로 보이는 이유입니다. 1/2파장이면 한 바퀴 돌아 제자리로 옵니다.</p>
+      <div class="math">\[ \ell = \frac{\lambda}{4}:\ \ \cZ{z_{\text{in}}} = \frac{1}{\cZ{z_L}} \]\[ \ell = \frac{\lambda}{2}:\ \ \cZ{z_{\text{in}}} = \cZ{z_L} \]</div>
+      <p>손실이 있는 케이블에서는 반사파가 오가는 동안 약해집니다. 케이블 손실이 a dB이면 왕복으로 2a dB가 줄어 |Γ|가 작아지고, 점은 원이 아니라 중심 쪽으로 감겨 드는 나선을 그립니다. 안테나에서 SWR 3인 경우, 손실 1 dB인 케이블을 거치면 무선실에서는 약 2.3으로 보입니다.</p>
+      <div class="math">\[ |\cG{\Gamma_{\text{in}}}| = |\cG{\Gamma_L}| \times 10^{-2a/20} \]</div>
+    </div>
+    <div class="stage">
+      <canvas id="cvE" aria-label="케이블 길이에 따라 SWR 원을 따라 회전하는 반사계수의 점"></canvas>
+      <div class="controls">
+        <label for="rE">안테나 R <input type="range" id="rE" min="0" max="250" value="100" style="width:120px"></label>
+        <label for="xE">안테나 X <input type="range" id="xE" min="-250" max="250" value="0" style="width:120px"></label>
+      </div>
+      <div class="controls">
+        <label for="lE">케이블 길이 <input type="range" id="lE" min="0" max="100" step="0.5" value="25" style="width:150px"></label>
+        <label for="aE">케이블 손실 <input type="range" id="aE" min="0" max="30" value="0" style="width:110px"></label>
+      </div>
+      <div class="controls presets">
+        <span class="lbl">길이 예</span>
+        <button type="button" class="alt" data-l="0">0</button>
+        <button type="button" class="alt" data-l="12.5">λ/8</button>
+        <button type="button" class="alt" data-l="25">λ/4</button>
+        <button type="button" class="alt" data-l="50">λ/2</button>
+      </div>
+      <div class="status"><div class="read lines" id="readE"></div></div>
+      <dl class="guide"><div><dt>조작</dt><dd>안테나의 R과 X를 정한 뒤 케이블 길이(케이블 속 파장 단위, 0~1λ)와 케이블 손실(0~3 dB)을 바꿉니다.</dd></div><div><dt>관찰</dt><dd>흐린 점은 안테나 급전점, 진한 점은 VNA가 있는 케이블 끝입니다. 손실이 0이면 점이 점선 SWR 원을 따라 시계 방향으로 돌고, λ/2마다 제자리로 옵니다. 손실을 넣으면 갈색 경로가 중심 쪽으로 감겨 듭니다.</dd></div><div><dt>의미</dt><dd>케이블은 임피던스를 회전시키고, 손실은 SWR을 실제보다 좋아 보이게 합니다.</dd></div></dl>
+    </div>
+    <div class="prose">
+      <p>NanoVNA의 Electrical Delay(전기적 지연)는 이 회전을 계산으로 되돌리는 기능입니다. 케이블의 지연 시간을 넣으면 화면의 점이 반대 방향으로 돌아가 급전점에서 잰 것에 가까운 값을 보여 줍니다. 손실까지 되돌리지는 못하며, 설정 방식은 펌웨어마다 다르므로 설명서를 확인해야 합니다. 5장의 "위쪽이면 길다"는 급전점에서 잰 값에만 맞는 규칙입니다. 케이블 끝에서 잴 때는 이 기능으로 회전을 되돌리거나 1/2파장의 배수인 케이블을 쓰면 됩니다.</p>
+    </div>
+    <div class="answer" style="--k:var(--f)">케이블은 Γ를 SWR 원을 따라 회전시킵니다. 손실이 없으면 SWR은 그대로이고 R + jX만 바뀌며, 손실이 있으면 점이 중심 쪽으로 감겨 SWR이 실제보다 좋아 보입니다.</div>
+  </section>
+
+  <!-- 7 -->
+  <section class="scene" id="s7">
+    <div class="tag">마무리</div>
+    <h2>세 편을 한 줄로 정리하면</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>1편 공진</th><th>2편 정합</th><th>3편 스미스 차트</th></tr></thead>
+        <tbody>
+          <tr><td>다룬 화살표</td><td>Z의 +j, −j 성분</td><td>반사 화살표 Γ</td><td>Γ 평면 위의 점</td></tr>
+          <tr><td>핵심 식</td><td>f₀ = 1/(2π√LC)</td><td>Γ = (Z<sub>L</sub>−Z₀)/(Z<sub>L</sub>+Z₀)</td><td>Γ = (z−1)/(z+1)</td></tr>
+          <tr><td>차트 위의 모습</td><td>가로축 위 (x = 0)</td><td>중심 (Γ = 0)</td><td>점의 위치, 궤적, 회전</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>NanoVNA 화면에 보이는 것</th><th>뜻</th></tr></thead>
+        <tbody>
+          <tr class="hit"><td>점이 중심에 있음</td><td>정합 (SWR 1)</td></tr>
+          <tr><td>점이 가로축 위에 있음</td><td>공진 (X = 0)</td></tr>
+          <tr><td>점이 위쪽 / 아래쪽</td><td>유도성 / 용량성. 급전점이라면 안테나가 길다 / 짧다</td></tr>
+          <tr><td>점이 바깥 원에 붙어 있음</td><td>전부 반사. 단락이나 개방이므로 케이블과 커넥터 확인</td></tr>
+          <tr><td>케이블을 바꾸면 R + jX만 바뀌고 SWR은 같음</td><td>케이블에 의한 회전. 정상</td></tr>
+          <tr><td>궤적이 중심 쪽으로 감겨 들고 SWR이 지나치게 좋음</td><td>케이블 손실</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>머리말의 세 질문에 답하면 이렇습니다.</p>
+      <p><strong>NanoVNA가 재는 것:</strong> 반사계수 Γ 하나입니다. SWR, 반사 손실, R + jX는 모두 Γ에서 계산합니다.</p>
+      <p><strong>원과 호의 출처:</strong> R–X 평면의 직선을 Γ = (z−1)/(z+1)로 옮기면 원이 됩니다. r 일정선은 원, x 일정선은 호입니다.</p>
+      <p><strong>케이블과 값의 변화:</strong> 케이블은 Γ를 e<sup>−j2βℓ</sup>만큼 회전시킵니다. |Γ|는 그대로라 SWR은 같고, 위치가 바뀌어 R + jX가 달라집니다.</p>
+      <p>세 편 모두 같은 도구 하나를 썼습니다. 회전하는 화살표, 곧 \(e^{\cJ{j}\theta}\)입니다. 스미스 차트는 그 화살표가 놓일 수 있는 모든 자리에 임피던스 눈금을 적어 둔 지도입니다. 차트 위에서 정합 회로를 설계하는 방법(L형 정합 등)은 이 연작에서 다루지 않았습니다.</p>
+    </div>
+    <div class="next">
+      <div class="tag">연작 완결</div>
+      <p>무선 공식, 수학으로 보기는 세 편으로 마칩니다. 처음부터 다시 보려면 <a href="index.html">1편 공진 공식은 어디서 왔을까</a>로 이동하십시오.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>무선 공식, 수학으로 보기 · 3편 스미스 차트</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  const root = getComputedStyle(document.documentElement);
+  const K = n => root.getPropertyValue(n).trim();
+  const COL = {pi:K('--pi'), f:K('--f'), w:K('--w'), j:K('--j'), r:K('--r'), l:K('--l'), c:K('--c'), fg:K('--fg'), muted:K('--muted'), line:K('--line'), screen:K('--screen'), soft:K('--soft'), bg:K('--bg')};
+  const TAU = Math.PI*2, Z0 = 50;
+  const SANS = '"IBM Plex Sans KR", system-ui, sans-serif';
+  const MATHF = '"Times New Roman", "STIX Two Math", serif';
+
+  function fit(cv, h){
+    const w = cv.parentElement.clientWidth || 300;
+    const d = window.devicePixelRatio || 1;
+    const tw = Math.round(w*d), th = Math.round(h*d);
+    if (cv.width !== tw || cv.height !== th){ cv.width = tw; cv.height = th; cv.style.height = h + 'px'; }
+    const g = cv.getContext('2d');
+    g.setTransform(d,0,0,d,0,0);
+    g.clearRect(0,0,w,h);
+    return {g, w, h};
+  }
+  function arrow(g, x1, y1, x2, y2, col, lw){
+    lw = lw || 3;
+    const dx = x2-x1, dy = y2-y1, len = Math.hypot(dx,dy);
+    if (len < 1) return;
+    const ux = dx/len, uy = dy/len, hl = Math.min(11, len*0.5), hw = hl*0.55;
+    g.strokeStyle = col; g.fillStyle = col; g.lineWidth = lw; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2-ux*hl*0.8, y2-uy*hl*0.8); g.stroke();
+    g.beginPath(); g.moveTo(x2,y2); g.lineTo(x2-ux*hl-uy*hw, y2-uy*hl+ux*hw); g.lineTo(x2-ux*hl+uy*hw, y2-uy*hl-ux*hw); g.closePath(); g.fill();
+  }
+  function text(g, s, x, y, col, font, align, base){
+    g.fillStyle = col; g.font = font; g.textAlign = align || 'left'; g.textBaseline = base || 'alphabetic'; g.fillText(s, x, y);
+  }
+  function tag(g, s, x, y, col, font, align){
+    g.font = font; const m = g.measureText(s).width;
+    const x0 = align === 'right' ? x - m : align === 'center' ? x - m/2 : x;
+    g.fillStyle = COL.screen; g.globalAlpha = 0.9; g.fillRect(x0-4, y-14, m+8, 19); g.globalAlpha = 1;
+    text(g, s, x, y, col, font, align);
+  }
+  function dot(g, x, y, r, col, alpha){ g.globalAlpha = alpha == null ? 1 : alpha; g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); g.globalAlpha = 1; }
+  const fmt = (v, n) => { const t = Math.abs(v) < 0.5*Math.pow(10, -n) ? 0 : v; return t.toLocaleString('ko-KR', {minimumFractionDigits:n, maximumFractionDigits:n}).replace('-', '−'); };
+  const sgn = (v, n) => (v < -0.5*Math.pow(10, -(n == null ? 3 : n)) ? '−' : '+');
+  const zTxt = (R, X, n) => fmt(R, n) + ' ' + sgn(X, n) + ' j' + fmt(Math.abs(X), n);
+  /* normalized z = r + jx  ->  Γ */
+  function gz(r, x){ const den = (r+1)*(r+1) + x*x; return {re:(r*r + x*x - 1)/den, im:2*x/den}; }
+  /* Γ -> normalized z (null at Γ = +1) */
+  function zg(u, v){ const den = (1-u)*(1-u) + v*v; if (den < 1e-9) return null; return {r:(1 - u*u - v*v)/den, x:2*v/den}; }
+  const magOf = G => Math.hypot(G.re, G.im);
+  const swrOf = m => m >= 0.9999 ? Infinity : (1+m)/(1-m);
+  const swrTxt = s => isFinite(s) ? fmt(s, 2) : '∞';
+  function setLines(el, arr){ el.textContent = ''; arr.forEach(t => { const d = document.createElement('div'); d.textContent = t; el.appendChild(d); }); }
+
+  /* ---------- Smith chart grid ---------- */
+  const RS = [0.2, 0.5, 1, 2, 5], XS = [0.2, 0.5, 1, 2, 5];
+  function rCircle(g, cx, cy, rr, r){ const c = r/(r+1), rad = 1/(r+1); g.beginPath(); g.arc(cx + rr*c, cy, rr*rad, 0, TAU); g.stroke(); }
+  function xArc(g, cx, cy, rr, x){
+    if (Math.abs(x) < 1e-6){ g.beginPath(); g.moveTo(cx - rr, cy); g.lineTo(cx + rr, cy); g.stroke(); return; }
+    g.save(); g.beginPath(); g.arc(cx, cy, rr, 0, TAU); g.clip();
+    g.beginPath(); g.arc(cx + rr, cy - rr/x, rr/Math.abs(x), 0, TAU); g.stroke(); g.restore();
+  }
+  function drawSmith(g, cx, cy, rr, opt){
+    opt = opt || {};
+    g.strokeStyle = COL.line; g.lineWidth = 1;
+    RS.forEach(r => rCircle(g, cx, cy, rr, r));
+    XS.forEach(x => { xArc(g, cx, cy, rr, x); xArc(g, cx, cy, rr, -x); });
+    g.beginPath(); g.moveTo(cx - rr, cy); g.lineTo(cx + rr, cy); g.stroke();
+    g.strokeStyle = COL.muted; g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, rr, 0, TAU); g.stroke();
+    if (opt.labels){
+      const fs = rr < 110 ? 10 : 11.5;
+      [0].concat(RS).forEach(r => {
+        if (rr < 110 && (r === 0.2 || r === 5)) return;
+        const u = (r-1)/(r+1);
+        text(g, String(r), cx + rr*u + 3, cy + fs + 2, COL.muted, fs + 'px '+SANS, 'left');
+      });
+      XS.forEach(x => {
+        if (rr < 110 && (x === 0.2 || x === 5)) return;
+        [x, -x].forEach(xx => {
+          const G = gz(0, xx), px = cx + rr*G.re, py = cy - rr*G.im;
+          const k = 1 + 14/rr;
+          const lx = cx + rr*G.re*k, ly = cy - rr*G.im*k;
+          text(g, (xx > 0 ? '+j' : '−j') + Math.abs(xx), lx, ly + 4, COL.muted, fs + 'px '+SANS, G.re > 0.05 ? 'left' : G.re < -0.05 ? 'right' : 'center');
+        });
+      });
+    }
+    if (opt.ends){
+      text(g, '단락', cx - rr - 6, cy - 6, COL.muted, '12px '+SANS, 'right');
+      text(g, '개방', cx + rr + 6, cy - 6, COL.muted, '12px '+SANS, 'left');
+    }
+  }
+
+  /* ---------- A: one Γ, many displays ---------- */
+  const cvA = document.getElementById('cvA'), mA = document.getElementById('mA'), tA = document.getElementById('tA'), calcA = document.getElementById('calcA');
+  function drawA(){
+    const h = 280;
+    const {g, w} = fit(cvA, h);
+    const m = mA.value/100, th = tA.value*Math.PI/180;
+    const G = {re:m*Math.cos(th), im:m*Math.sin(th)};
+    const rr = Math.min(h/2 - 26, w/2 - 56), cx = w/2, cy = h/2;
+    g.strokeStyle = COL.line; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(cx-rr-10, cy); g.lineTo(cx+rr+10, cy); g.moveTo(cx, cy-rr-10); g.lineTo(cx, cy+rr+10); g.stroke();
+    g.setLineDash([3,4]); g.beginPath(); g.arc(cx, cy, rr*m, 0, TAU); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = COL.muted; g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, rr, 0, TAU); g.stroke();
+    text(g, '단락 −1', cx - rr - 8, cy + 16, COL.muted, '12px '+SANS, 'right');
+    text(g, '개방 +1', cx + rr + 8, cy + 16, COL.muted, '12px '+SANS, 'left');
+    text(g, '정합 0', cx + 6, cy + 16, COL.muted, '12px '+SANS, 'left');
+    const tx = cx + rr*G.re, ty = cy - rr*G.im;
+    if (m > 0.004){
+      arrow(g, cx, cy, tx, ty, COL.w, 3.5);
+      if (m > 0.08){ g.strokeStyle = COL.w; g.globalAlpha = 0.5; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, rr*0.16, 0, -th, th > 0); g.stroke(); g.globalAlpha = 1; }
+    }
+    dot(g, tx, ty, 5, COL.w);
+    tag(g, 'Γ = S₁₁', tx + (G.re >= 0 ? 10 : -10), ty - 8, COL.w, 'italic 600 15px '+MATHF, G.re >= 0 ? 'left' : 'right');
+    const s = swrOf(m), z = zg(G.re, G.im);
+    const rows = [
+      ['LOGMAG', m < 1e-6 ? '−∞ dB' : fmt(20*Math.log10(m), 2) + ' dB'],
+      ['PHASE', fmt(+tA.value, 0) + '°'],
+      ['SWR', swrTxt(s)],
+      ['R + jX', z ? zTxt(z.r*Z0, z.x*Z0, 1) + ' Ω' : '∞ (개방)', true],
+      ['반사 전력 |Γ|²', fmt(m*m*100, 1) + ' %']
+    ];
+    calcA.textContent = '';
+    rows.forEach(r => { const d = document.createElement('div'); if (r[2]) d.className = 'end'; const a = document.createElement('span'); a.textContent = r[0]; const b = document.createElement('span'); b.textContent = r[1]; d.appendChild(a); d.appendChild(b); calcA.appendChild(d); });
+  }
+  [mA, tA].forEach(el => el.addEventListener('input', drawA));
+
+  /* ---------- B: R–X plane -> Γ disk ---------- */
+  const cvB = document.getElementById('cvB'), rB = document.getElementById('rB'), xB = document.getElementById('xB'), readB = document.getElementById('readB');
+  function drawB(){
+    const wide = (cvB.parentElement.clientWidth || 300) >= 600;
+    const h = wide ? 320 : 600;
+    const {g, w} = fit(cvB, h);
+    const r = rB.value/100, x = xB.value/100;
+    const pw = wide ? w/2 : w, ph = wide ? h : h/2;
+    // left / top panel: z plane
+    const RMAX = 3.2, XMAX = 2.4;
+    const ax = 34, ay = 30, aw = pw - ax - 22, ah = ph - ay - 34;
+    const sx = aw/RMAX, sy = (ah/2)/XMAX, s0 = Math.min(sx, sy);
+    const ox = ax, oy = ay + ah/2;
+    const P = (rr, xx) => [ox + rr*s0, oy - xx*s0];
+    text(g, 'R–X 평면 (z = r + jx)', ax, 18, COL.muted, '12px '+SANS, 'left');
+    g.save(); g.beginPath(); g.rect(ax - 4, ay - 4, aw + 8, ah + 8); g.clip();
+    g.strokeStyle = COL.line; g.lineWidth = 1;
+    [0.2, 0.5, 1, 2, 3].forEach(v => { const [px] = P(v, 0); g.beginPath(); g.moveTo(px, ay); g.lineTo(px, ay + ah); g.stroke(); });
+    [0.5, 1, 2].forEach(v => [v, -v].forEach(vv => { const [, py] = P(0, vv); g.beginPath(); g.moveTo(ax, py); g.lineTo(ax + aw, py); g.stroke(); }));
+    g.strokeStyle = COL.muted; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(ax, oy); g.lineTo(ax + aw, oy); g.moveTo(ax, ay); g.lineTo(ax, ay + ah); g.stroke();
+    // highlighted lines
+    g.lineWidth = 2.5;
+    g.strokeStyle = COL.r; const [lx] = P(r, 0); if (r <= RMAX){ g.beginPath(); g.moveTo(lx, ay); g.lineTo(lx, ay + ah); g.stroke(); }
+    g.strokeStyle = COL.j; const [, ly] = P(0, x); if (Math.abs(x) <= XMAX){ g.beginPath(); g.moveTo(ax, ly); g.lineTo(ax + aw, ly); g.stroke(); }
+    g.restore();
+    [1, 2, 3].forEach(v => { const [px] = P(v, 0); text(g, String(v), px, oy + 14, COL.muted, '11px '+SANS, 'center'); });
+    [1, 2].forEach(v => [v, -v].forEach(vv => { const [, py] = P(0, vv); text(g, (vv > 0 ? '+j' : '−j') + v, ax - 4, py + 4, COL.muted, '11px '+SANS, 'right'); }));
+    text(g, 'r →', ax + aw, oy - 6, COL.muted, '11px '+SANS, 'right');
+    const [d0x, d0y] = P(0, 0), [d1x, d1y] = P(1, 0);
+    dot(g, d0x, d0y, 3.5, COL.muted); dot(g, d1x, d1y, 3.5, COL.muted);
+    text(g, '단락', d0x + 5, d0y - 6, COL.muted, '11px '+SANS, 'left');
+    text(g, '정합', d1x + 5, d1y - 6, COL.muted, '11px '+SANS, 'left');
+    if (r <= RMAX && Math.abs(x) <= XMAX){ const [px, py] = P(r, x); dot(g, px, py, 5.5, COL.pi); }
+    else { tag(g, '점이 그림 밖에 있습니다', ax + aw, ay + 8, COL.pi, '600 11.5px '+SANS, 'right'); }
+    // right / bottom panel: Γ disk
+    const bx = wide ? pw : 0, by = wide ? 0 : ph;
+    const rr = Math.min(pw/2 - 46, ph/2 - 30), cx = bx + pw/2, cy = by + ph/2 + 6;
+    if (wide) text(g, 'Γ 원판 (스미스 차트)', bx + 18, by + 18, COL.muted, '12px '+SANS, 'left');
+    drawSmith(g, cx, cy, rr, {ends:true});
+    g.lineWidth = 2.5;
+    g.strokeStyle = COL.r; rCircle(g, cx, cy, rr, r);
+    g.strokeStyle = COL.j; xArc(g, cx, cy, rr, x);
+    dot(g, cx + rr, cy, 3.5, COL.fg);
+    dot(g, cx, cy, 3, COL.muted);
+    const G = gz(r, x);
+    dot(g, cx + rr*G.re, cy - rr*G.im, 5.5, COL.pi);
+    // mapping arrow
+    if (wide){ text(g, 'Γ = (z−1)/(z+1) →', pw - 10, h - 12, COL.soft, '12.5px '+SANS, 'center'); }
+    else { text(g, '↓ Γ = (z−1)/(z+1) · Γ 원판 (스미스 차트)', ax, ph + 6, COL.soft, '12.5px '+SANS, 'left'); }
+    const m = magOf(G);
+    setLines(readB, ['z = ' + zTxt(r, x, 2) + ' (50 Ω 계통에서 Z = ' + zTxt(r*Z0, x*Z0, 0) + ' Ω)',
+      'Γ = ' + fmt(G.re, 3) + ' ' + sgn(G.im) + ' j' + fmt(Math.abs(G.im), 3) + ' · |Γ| = ' + fmt(m, 3) + ' · SWR ' + swrTxt(swrOf(m)),
+      'r 원: 중심 ' + fmt(r/(r+1), 3) + ', 반지름 ' + fmt(1/(r+1), 3) + (Math.abs(x) < 1e-6 ? ' · x = 0은 가로축' : ' · x 호: 중심 (1, ' + fmt(1/x, 2) + '), 반지름 ' + fmt(1/Math.abs(x), 2))]);
+  }
+  [rB, xB].forEach(el => el.addEventListener('input', drawB));
+  document.querySelectorAll('#s2 .presets button').forEach(b => b.addEventListener('click', () => { rB.value = b.dataset.r; xB.value = b.dataset.x; drawB(); }));
+
+  /* ---------- C: reading a point ---------- */
+  const cvC = document.getElementById('cvC'), rC = document.getElementById('rC'), xC = document.getElementById('xC'), readC = document.getElementById('readC');
+  function drawC(){
+    const h = 360;
+    const {g, w} = fit(cvC, h);
+    const rr = Math.min(h/2 - 34, w/2 - 58), cx = w/2, cy = h/2;
+    drawSmith(g, cx, cy, rr, {labels:true});
+    const R = +rC.value, X = +xC.value, r = R/Z0, x = X/Z0;
+    const G = gz(r, x), m = magOf(G);
+    g.lineWidth = 2;
+    g.globalAlpha = 0.85; g.strokeStyle = COL.r; rCircle(g, cx, cy, rr, r); g.strokeStyle = COL.j; xArc(g, cx, cy, rr, x); g.globalAlpha = 1;
+    if (m > 0.01){ g.setLineDash([5,4]); g.strokeStyle = COL.pi; g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, rr*m, 0, TAU); g.stroke(); g.setLineDash([]); }
+    const px = cx + rr*G.re, py = cy - rr*G.im;
+    if (m > 0.02){ g.globalAlpha = 0.6; arrow(g, cx, cy, px, py, COL.w, 2); g.globalAlpha = 1; }
+    dot(g, px, py, 6, COL.pi);
+    text(g, '유도성 (+jX)', 12, 20, COL.l, '600 12.5px '+SANS, 'left');
+    text(g, '용량성 (−jX)', 12, h - 12, COL.c, '600 12.5px '+SANS, 'left');
+    const s = swrOf(m), ang = m < 1e-6 ? 0 : Math.atan2(G.im, G.re)*180/Math.PI;
+    const kind = Math.abs(X) < 0.5 ? '공진 (가로축 위)' : X > 0 ? '유도성 (위쪽)' : '용량성 (아래쪽)';
+    setLines(readC, ['Z = ' + zTxt(R, X, 0) + ' Ω → z = ' + zTxt(r, x, 2) + ' · ' + kind,
+      '|Γ| = ' + fmt(m, 3) + ' ∠ ' + fmt(ang, 1) + '° · SWR ' + swrTxt(s) + ' · 반사 손실 ' + (m < 1e-6 ? '∞' : fmt(-20*Math.log10(m), 1) + ' dB')]);
+  }
+  [rC, xC].forEach(el => el.addEventListener('input', drawC));
+  document.querySelectorAll('#s4 .presets button').forEach(b => b.addEventListener('click', () => { rC.value = b.dataset.r; xC.value = b.dataset.x; drawC(); }));
+
+  /* ---------- D: frequency sweep ---------- */
+  const cvD = document.getElementById('cvD'), fD = document.getElementById('fD'), qD = document.getElementById('qD'), rD = document.getElementById('rD'), mD = document.getElementById('mD'), readD = document.getElementById('readD');
+  const F1 = 6.9, F2 = 7.3;
+  function zAt(f, f0, Q, R){ return {R:R, X:R*Q*(f/f0 - f0/f)}; }
+  function drawD(){
+    const wide = (cvD.parentElement.clientWidth || 300) >= 640;
+    const h = wide ? 320 : 520;
+    const {g, w} = fit(cvD, h);
+    const f0 = fD.value/1000, Q = +qD.value, R = +rD.value, fm = mD.value/1000;
+    const N = 240, pts = [];
+    for (let i = 0; i <= N; i++){ const f = F1 + (F2-F1)*i/N; const Z = zAt(f, f0, Q, R); const G = gz(Z.R/Z0, Z.X/Z0); pts.push({f, G, s:swrOf(magOf(G))}); }
+    // smith
+    const sw = wide ? w*0.48 : w, sh = wide ? h : 320;
+    const rr = Math.min(sh/2 - 26, sw/2 - 40), cx = sw/2, cy = sh/2;
+    drawSmith(g, cx, cy, rr, {});
+    g.strokeStyle = COL.w; g.lineWidth = 3; g.beginPath();
+    pts.forEach((p, i) => { const x = cx + rr*p.G.re, y = cy - rr*p.G.im; i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
+    const pS = pts[0], pE = pts[N];
+    dot(g, cx + rr*pS.G.re, cy - rr*pS.G.im, 4, COL.w);
+    const fm0 = mD.value/1000, Zm0 = zAt(fm0, f0, Q, R), Gm0 = gz(Zm0.R/Z0, Zm0.X/Z0);
+    const endTag = (p, label, dy) => {
+      const x = cx + rr*p.G.re, y = cy - rr*p.G.im;
+      if (Math.hypot(x - (cx + rr*Gm0.re), y - (cy - rr*Gm0.im)) < 22) return;
+      const right = x > cx + rr*0.15;
+      tag(g, label, x + (right ? -8 : 8), y + dy, COL.w, '600 11px '+SANS, right ? 'right' : 'left');
+    };
+    dot(g, cx + rr*pE.G.re, cy - rr*pE.G.im, 4, COL.w);
+    endTag(pS, F1.toFixed(1), 16);
+    endTag(pE, F2.toFixed(1) + ' MHz', -6);
+    const inBand = f0 >= F1 && f0 <= F2;
+    if (inBand){ const G0 = gz(R/Z0, 0); dot(g, cx + rr*G0.re, cy, 5, COL.r); }
+    const Zm = zAt(fm, f0, Q, R), Gm = gz(Zm.R/Z0, Zm.X/Z0), sm = swrOf(magOf(Gm));
+    const mx = cx + rr*Gm.re, my = cy - rr*Gm.im;
+    dot(g, mx, my, 6, COL.pi);
+    tag(g, '마커 ' + fmt(fm, 3), mx + (Gm.re > 0.15 ? -10 : 10), my + (Gm.im >= 0 ? -10 : 20), COL.pi, '600 12px '+SANS, Gm.re > 0.15 ? 'right' : 'left');
+    text(g, '위쪽: 유도성', 10, 18, COL.l, '600 11.5px '+SANS, 'left');
+    text(g, '아래쪽: 용량성', 10, sh - 10, COL.c, '600 11.5px '+SANS, 'left');
+    // SWR graph
+    const gx = wide ? sw + 40 : 44, gy = wide ? 30 : sh + 26, gw = (wide ? w - sw - 40 : w - 44) - 16, gh = (wide ? h - 30 - 40 : h - sh - 26 - 40);
+    const SMAX = 5;
+    const X = f => gx + gw*(f - F1)/(F2 - F1), Y = s => gy + gh*(1 - (Math.min(s, SMAX) - 1)/(SMAX - 1));
+    g.strokeStyle = COL.line; g.lineWidth = 1;
+    [1,2,3,4,5].forEach(s => { g.beginPath(); g.moveTo(gx, Y(s)); g.lineTo(gx + gw, Y(s)); g.stroke(); text(g, String(s), gx - 6, Y(s) + 4, COL.muted, '11px '+SANS, 'right'); });
+    [6.9, 7.0, 7.1, 7.2, 7.3].forEach(f => text(g, f.toFixed(1), X(f), gy + gh + 16, COL.muted, '11px '+SANS, 'center'));
+    text(g, 'SWR', gx, gy - 10, COL.muted, '12px '+SANS, 'left');
+    text(g, 'MHz', gx + gw, gy + gh + 30, COL.muted, '11px '+SANS, 'right');
+    // band where SWR <= 2
+    let lo = null, hi = null; pts.forEach(p => { if (p.s <= 2){ if (lo === null) lo = p.f; hi = p.f; } });
+    if (lo !== null){ g.fillStyle = COL.r; g.globalAlpha = 0.1; g.fillRect(X(lo), gy, X(hi) - X(lo), gh); g.globalAlpha = 1; }
+    g.setLineDash([4,4]); g.strokeStyle = COL.muted; g.beginPath(); g.moveTo(gx, Y(2)); g.lineTo(gx + gw, Y(2)); g.stroke(); g.setLineDash([]);
+    g.save(); g.beginPath(); g.rect(gx, gy - 2, gw, gh + 4); g.clip();
+    g.strokeStyle = COL.w; g.lineWidth = 2.5; g.beginPath();
+    pts.forEach((p, i) => { const x = X(p.f), y = Y(p.s); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); g.restore();
+    g.strokeStyle = COL.pi; g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(fm), gy); g.lineTo(X(fm), gy + gh); g.stroke();
+    dot(g, X(fm), Y(sm), 5, COL.pi);
+    if (inBand){ g.strokeStyle = COL.r; g.lineWidth = 1; g.setLineDash([2,3]); g.beginPath(); g.moveTo(X(f0), gy); g.lineTo(X(f0), gy + gh); g.stroke(); g.setLineDash([]); }
+    const kind = Math.abs(Zm.X) < 0.5 ? '공진' : Zm.X > 0 ? '유도성 (f₀보다 높음)' : '용량성 (f₀보다 낮음)';
+    let best = pts[0]; pts.forEach(p => { if (p.s < best.s) best = p; });
+    setLines(readD, ['마커 ' + fmt(fm, 3) + ' MHz: Z = ' + zTxt(Zm.R, Zm.X, 1) + ' Ω · SWR ' + swrTxt(sm) + ' · ' + kind,
+      '공진 f₀ = ' + fmt(f0, 3) + ' MHz' + (inBand ? '' : ' (스윕 범위 밖)') + ' · Q = ' + Q + ' · R = ' + R + ' Ω · SWR 최소 ' + swrTxt(best.s) + ' (' + fmt(best.f, 3) + ' MHz)',
+      lo !== null ? 'SWR 2 이하 대역: ' + fmt(lo, 3) + '~' + fmt(hi, 3) + ' MHz (폭 ' + fmt((hi - lo)*1000, 0) + ' kHz)' : '스윕 범위 안에 SWR 2 이하인 곳이 없습니다']);
+  }
+  [fD, qD, rD, mD].forEach(el => el.addEventListener('input', drawD));
+
+  /* ---------- E: cable rotation ---------- */
+  const cvE = document.getElementById('cvE'), rE = document.getElementById('rE'), xE = document.getElementById('xE'), lE = document.getElementById('lE'), aE = document.getElementById('aE'), readE = document.getElementById('readE');
+  function drawE(){
+    const h = 340;
+    const {g, w} = fit(cvE, h);
+    const rr = Math.min(h/2 - 30, w/2 - 58), cx = w/2, cy = h/2;
+    drawSmith(g, cx, cy, rr, {labels:true});
+    const R = +rE.value, X = +xE.value, L = lE.value/100, a = aE.value/10;
+    const GL = gz(R/Z0, X/Z0), mL = magOf(GL), thL = Math.atan2(GL.im, GL.re);
+    const rot = 2*TAU*L, k = Math.pow(10, -2*a/20);
+    const at = t => { const m = mL*Math.pow(k, t), th = thL - rot*t; return {re:m*Math.cos(th), im:m*Math.sin(th)}; };
+    if (mL > 0.01){ g.setLineDash([5,4]); g.strokeStyle = COL.muted; g.lineWidth = 1.2; g.beginPath(); g.arc(cx, cy, rr*mL, 0, TAU); g.stroke(); g.setLineDash([]); }
+    if (L > 0 && mL > 0.005){
+      g.strokeStyle = COL.f; g.lineWidth = 2.5; g.beginPath();
+      const N = Math.max(20, Math.round(200*L));
+      for (let i = 0; i <= N; i++){ const G = at(i/N), x = cx + rr*G.re, y = cy - rr*G.im; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.stroke();
+    }
+    const GI = at(1), mI = magOf(GI);
+    const p1 = [cx + rr*GL.re, cy - rr*GL.im], p2 = [cx + rr*GI.re, cy - rr*GI.im];
+    dot(g, p1[0], p1[1], 6, COL.w, 0.45);
+    dot(g, p2[0], p2[1], 6.5, COL.w);
+    const same = Math.hypot(p2[0]-p1[0], p2[1]-p1[1]) < 16;
+    const side = x => x > cx + rr*0.2;
+    if (same) tag(g, '안테나 = 케이블 끝', p2[0] + (side(p2[0]) ? -10 : 10), p2[1] - 12, COL.w, '600 12px '+SANS, side(p2[0]) ? 'right' : 'left');
+    else {
+      // the right-hand point gets its label on its right, the left-hand point on its left, so the two never cover each other
+      const dirOf = (p, isRight) => { const out = isRight ? p[0] < cx + rr*0.55 : p[0] > cx - rr*0.55; return isRight ? out : !out; };
+      const r1 = p1[0] >= p2[0];
+      const d1 = dirOf(p1, r1), d2 = dirOf(p2, !r1);
+      let y1 = p1[1] - 12, y2 = p2[1] - 12;
+      // both labels on the same side and at nearly the same height: stack them so they cannot cover each other
+      if (d1 === d2 && Math.abs(p1[1] - p2[1]) < 22){ if (p1[1] <= p2[1]) y1 = p2[1] - 32; else y2 = p1[1] - 32; }
+      const lab = (p, s, col, toRight, y) => tag(g, s, p[0] + (toRight ? 10 : -10), y, col, '600 12px '+SANS, toRight ? 'left' : 'right');
+      lab(p1, '안테나', COL.soft, d1, y1);
+      lab(p2, '케이블 끝 (VNA)', COL.w, d2, y2);
+    }
+    const zI = zg(GI.re, GI.im);
+    setLines(readE, ['안테나 급전점: Z = ' + zTxt(R, X, 0) + ' Ω · SWR ' + swrTxt(swrOf(mL)),
+      '케이블 끝: Z = ' + (zI ? zTxt(zI.r*Z0, zI.x*Z0, 1) + ' Ω' : '∞ (개방)') + ' · SWR ' + swrTxt(swrOf(mI)),
+      '케이블 ' + fmt(L, 3) + ' λ · 회전 ' + fmt(720*L, 0) + '° (시계 방향) · 손실 ' + fmt(a, 1) + ' dB (왕복 ' + fmt(2*a, 1) + ' dB)']);
+  }
+  [rE, xE, lE, aE].forEach(el => el.addEventListener('input', drawE));
+  document.querySelectorAll('#s6 .presets button').forEach(b => b.addEventListener('click', () => { lE.value = b.dataset.l; drawE(); }));
+
+  function drawAll(){ drawA(); drawB(); drawC(); drawD(); drawE(); }
+  let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawAll, 120); });
+  drawAll();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll);
+})();
+</script>
+<script>
+(function(){
+  if (window.self === window.top) return;
+  var last = 0, on = false;
+  function send(force){
+    if (!on) return;
+    var h = Math.ceil(document.documentElement.scrollHeight);
+    if (!force && Math.abs(h - last) < 2) return;
+    last = h;
+    try { window.parent.postMessage({type: 'antenna-types:height', height: h}, '*'); } catch(e){}
+  }
+  window.addEventListener('message', function(e){
+    var d = e.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.type === 'antenna-types:ping'){
+      if (!on){ on = true; window.__embedOn = true; document.documentElement.classList.add('embedded'); }
+      send(true);
+    } else if (d.type === 'antenna-types:viewport'){
+      window.__embedView = {top: +d.top || 0, height: +d.height || 0};
+      document.dispatchEvent(new Event('embedview'));
+    }
+  });
+  if ('ResizeObserver' in window) new ResizeObserver(function(){ send(false); }).observe(document.body);
+  window.addEventListener('load', function(){ send(true); });
+})();
+</script>
+<script>
+(function(){
+  /* on narrow screens, turn tables that would overflow into stacked cards */
+  const tables = [...document.querySelectorAll('.table-wrap table')];
+  tables.forEach(t => {
+    const heads = [...t.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => { if (heads[i]) td.setAttribute('data-label', heads[i]); }));
+  });
+  function check(){
+    tables.forEach(t => {
+      t.classList.remove('stack');
+      const wrap = t.closest('.table-wrap');
+      if (wrap && t.scrollWidth > wrap.clientWidth + 2) t.classList.add('stack');
+    });
+  }
+  let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(check, 150); });
+  check();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(check);
+  window.addEventListener('load', () => { check(); setTimeout(check, 1500); });
+  if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(check);
+})();
+</script>
+<script>
+window.NARR = [
+["hero","h1",0,"무선 공식, 수학으로 보기. 3편, 스미스 차트는 무엇을 그리는 걸까."],
+["hero",".big",0,"맨 위의 식은 두 개입니다. 반사계수 감마는, 소문자 제트 빼기 1, 나누기 소문자 제트 더하기 1. 그리고 소문자 제트는 임피던스 제트를 제트 제로로 나눈 값입니다. 나노 브이엔에이를 안테나에 연결하면 원과 호가 가득한 차트 위에 점 하나가 찍힙니다. 이 차트는 2편의 감마 평면 위에 임피던스 눈금을 겹쳐 그린 것입니다."],
+["hero",".qs",0,"질문은 세 가지입니다. 나노 브이엔에이는 무엇을 재고 있을까요? 스미스 차트의 원과 호는 어디서 왔을까요? 그리고 케이블을 붙이면 왜 값이 바뀔까요?"],
+["hero",".lede",1,"출발점은 2편의 반사계수 감마입니다."],
+
+["s1","h2",0,"1장. 브이엔에이가 재는 것은 감마 하나입니다. 질문은, 에스더블유알과 알 더하기 제이 엑스, 스미스 차트는 각각 따로 재는 값인가입니다."],
+["s1",".plates",0,"기호 둘입니다. 브이엔에이는 벡터 네트워크 분석기로, 반사파의 크기와 위상을 함께 잽니다. 에스 일일은 포트 1로 보낸 파에 대해 포트 1로 돌아온 파의 비, 곧 2편의 반사계수 감마입니다."],
+["s1",".prose",0,"브이엔에이는 알고 있는 신호를 내보내고, 안테나에서 되돌아온 신호를 받습니다. 두 신호의 비를 크기뿐 아니라 위상까지 재므로 결과는 화살표 하나, 반사계수 감마입니다. 위상까지 잰다는 점이 이름의 벡터입니다. 크기만 재는 에스더블유알 미터는 감마의 크기만 알 수 있어서 저항과 리액턴스를 구분하지 못합니다. 그래서 나노 브이엔에이 화면의 여러 그래프는 모두 같은 감마에서 계산한 값입니다."],
+["s1",".table-wrap",0,"표로 보면, 로그 매그는 감마 크기의 데시벨 값으로 반사 손실에 마이너스를 붙인 것입니다. 페이즈는 감마의 각도, 에스더블유알은 1 더하기 감마의 크기 나누기 1 빼기 감마의 크기, 폴라는 감마 평면 그대로입니다. 그리고 스미스 차트는 감마에서 계산한 알 더하기 제이 엑스를 그 위치에 보여 줍니다."],
+["s1",".prose",1,"측정 전에 하는 교정은 감마 평면의 기준점 세 개를 기기에 알려 주는 일입니다. 단락은 감마 마이너스 1, 개방은 플러스 1, 50옴 부하는 0입니다. 교정 뒤 포트를 열어 둔 채 재면 전 대역에서 로그 매그가 0데시벨 근처에 있고, 스미스 차트의 점은 오른쪽 끝에 머뭅니다."],
+["s1",".stage",0,"그림에서 감마의 크기와 각도를 바꾸면, 아래의 로그 매그, 페이즈, 에스더블유알, 알 더하기 제이 엑스가 함께 바뀝니다. 각도만 바꾸면 에스더블유알은 그대로이고 알 더하기 제이 엑스만 바뀝니다."],
+["s1",".answer",0,"1장의 결론이자 첫 질문의 답입니다. 브이엔에이는 감마 하나를 잽니다. 에스더블유알, 반사 손실, 알 더하기 제이 엑스, 스미스 차트는 모두 그 감마를 다르게 나타낸 것입니다."],
+
+["s2","h2",0,"2장. 임피던스 평면을 원판 안으로 옮깁니다. 질문은, 끝없이 넓은 알 엑스 평면을 어떻게 원 하나에 담는가입니다."],
+["s2",".plates",0,"기호입니다. 소문자 제트는 정규화 임피던스로, 임피던스를 제트 제로로 나눈 값입니다. 50옴이 1이 됩니다. 소문자 알과 소문자 엑스는 그 실수부와 허수부입니다."],
+["s2",".prose",0,"먼저 모든 임피던스를 제트 제로로 나눕니다. 50옴 계통에서 28 더하기 제이 42옴은 0.56 더하기 제이 0.84가 됩니다. 이렇게 하면 어느 계통이든 같은 차트를 쓸 수 있고, 정합점은 언제나 1입니다. 반사계수 식도 소문자 제트로 쓰면, 제트 빼기 1 나누기 제트 더하기 1로 간단해집니다. 세 점을 넣어 보면, 제트가 1이면 감마는 0, 중심입니다. 제트가 0이면 마이너스 1, 왼쪽 끝입니다. 제트가 한없이 커지면 플러스 1, 오른쪽 끝입니다. 저항이 0 이상이면 감마의 크기는 1을 넘을 수 없으므로, 알 엑스 평면의 오른쪽 절반 전체가 반지름 1인 원 안으로 들어갑니다."],
+["s2",".stage",0,"그림 왼쪽은 알 엑스 평면, 오른쪽은 감마 원판입니다. 왼쪽의 초록 세로선, 곧 저항이 일정한 선은 오른쪽에서 초록 원이 되고, 보라 가로선, 곧 리액턴스가 일정한 선은 보라 호가 됩니다. 소문자 알을 키우면 초록 원이 작아지며 오른쪽 끝으로 몰립니다. 모든 원과 호는 오른쪽 끝 한 점을 지납니다."],
+["s2",".answer",0,"2장의 결론입니다. 스미스 차트는 감마 평면 위에 알 엑스 격자를 옮겨 그린 지도입니다. 점의 위치가 감마이고, 그 점을 지나는 원과 호의 눈금이 저항과 리액턴스입니다."],
+
+["s3","h2",0,"3장. 직선이 원으로 바뀌는 이유. 질문은, 왜 하필 원과 호인가입니다."],
+["s3",".prose",0,"변환을 거꾸로 풀면 소문자 제트는 1 더하기 감마 나누기 1 빼기 감마입니다. 감마를 유 더하기 제이 브이로 두고 실수부와 허수부를 나누면, 소문자 알과 엑스가 유와 브이의 식으로 나옵니다. 알을 정해 두고 정리하면, 중심이 가로축 위, 알 나누기 알 더하기 1인 곳에 있고, 반지름이 1 나누기 알 더하기 1인 원이 됩니다. 알이 커질수록 원은 작아지며 오른쪽 끝으로 몰립니다. 엑스를 정해 두고 정리하면, 중심이 1, 1 나누기 엑스인 곳에 있고 반지름이 1 나누기 엑스의 절댓값인 원이 됩니다. 이 원의 중심은 원판 밖에 있으므로 원판 안에 들어온 일부만 보이고, 그래서 호로 그려집니다. 엑스가 양수면 위쪽, 음수면 아래쪽이고, 엑스가 0이면 반지름이 한없이 커져 가로축이 됩니다."],
+["s3",".table-wrap",0,"표로 보면, 알이 0인 원은 바깥 원 자체입니다. 알이 0.5인 원은 25옴 점을, 알이 1인 원은 중심, 곧 50옴 정합점을, 알이 2인 원은 100옴 점을 지납니다."],
+["s3",".prose",1,"모든 원은 오른쪽 끝을 지납니다. 직선은 무한히 먼 곳에서 서로 만나는데, 그 무한대가 감마 플러스 1 한 점으로 옮겨지기 때문입니다. 이렇게 일차식을 일차식으로 나눈 변환은 직선과 원을 언제나 원으로 옮기는 성질이 있고, 뫼비우스 변환이라고 부릅니다. 이 성질은 1장의 교정과도 이어집니다. 기기 내부의 오차도 실제 감마를 같은 꼴의 분수식으로 바꿔 놓는데, 이런 변환은 세 점의 대응이 정해지면 하나로 결정됩니다. 교정 표준이 단락, 개방, 부하 세 개인 이유입니다."],
+["s3",".answer",0,"3장의 결론이자 두 번째 질문의 답입니다. 저항이 일정한 선은 중심이 가로축 위에 있는 원, 리액턴스가 일정한 선은 중심이 원판 밖에 있는 원의 일부가 됩니다. 그래서 스미스 차트는 원과 호로 이루어집니다."],
+
+["s4","h2",0,"4장. 점 하나에서 네 가지를 읽습니다. 질문은, 나노 브이엔에이에 28 더하기 제이 42옴이 찍혔다면 무엇을 알 수 있는가입니다."],
+["s4",".prose",0,"점의 위치만으로 네 가지를 읽습니다. 첫째, 위아래입니다. 가로축 위쪽은 유도성, 아래쪽은 용량성, 가로축 위는 공진입니다. 둘째, 점을 지나는 원과 호의 눈금이 저항과 리액턴스입니다. 셋째, 중심까지의 거리가 감마의 크기, 곧 에스더블유알입니다. 중심을 둘러싼 같은 원 위의 점은 저항과 리액턴스가 달라도 에스더블유알이 같습니다. 넷째, 중심에서 본 각도가 반사 위상입니다. 28 더하기 제이 42옴을 예로 들면, 점이 위쪽에 있으니 유도성이고, 저항이 50옴보다 작습니다. 감마의 크기는 약 0.54, 에스더블유알은 약 3.3, 반사 손실은 약 5.4데시벨입니다."],
+["s4",".stage",0,"그림에서 분홍 점이 임피던스, 점선 원은 그 점과 에스더블유알이 같은 점들입니다. 엑스를 바꾸면 점이 초록 저항 원을 따라 움직이고, 알을 바꾸면 보라 리액턴스 호를 따라 움직입니다. 안테나 예 버튼으로 4분의 1 파장 버티컬이나 길게 자른 다이폴의 위치도 확인해 보십시오."],
+["s4",".answer",0,"4장의 결론입니다. 점의 위아래는 유도성과 용량성, 지나는 원과 호는 저항과 리액턴스, 중심까지의 거리는 에스더블유알, 중심에서 본 각도는 반사 위상입니다."],
+
+["s5","h2",0,"5장. 주파수를 바꾸면 점이 궤적을 그립니다. 질문은, 대역을 훑으면 왜 점이 아니라 곡선이 나오는가입니다."],
+["s5",".plates",0,"기호 둘입니다. 에프 제로는 공진 주파수, 리액턴스가 0이 되는 주파수입니다. 큐는 선택도로, 공진 근처에서 리액턴스가 얼마나 빨리 변하는지를 나타냅니다. 클수록 대역폭이 좁습니다."],
+["s5",".prose",0,"안테나의 임피던스는 주파수에 따라 변합니다. 공진 근처의 다이폴은 1편의 직렬 회로처럼 움직여서, 저항은 거의 일정하고 리액턴스는 알 곱하기 큐 곱하기, 에프 나누기 에프 제로 빼기 에프 제로 나누기 에프입니다. 그래서 점은 3장의 저항 원 위를 움직입니다. 공진 주파수보다 낮으면 아래쪽, 높으면 위쪽에 있고, 공진 주파수에서 가로축을 지납니다. 여기서 실용적인 규칙이 나옵니다. 같은 주파수에서 볼 때 안테나가 길면 공진 주파수가 내려가므로 점이 위쪽, 유도성에 찍힙니다. 짧으면 아래쪽, 용량성입니다. 실제 안테나는 저항도 조금씩 변해서, 리액턴스가 0인 주파수와 에스더블유알이 가장 낮은 주파수가 조금 어긋나기도 합니다. 다만 이 규칙은 다이폴이나 4분의 1 파장 버티컬처럼 급전점에서 직렬 공진하는 안테나에 맞습니다. 이에프에이치더블유처럼 급전점이 병렬 공진에 가까운 안테나는 위아래 관계가 반대로 나타날 수 있습니다."],
+["s5",".stage",0,"그림은 6.9에서 7.3메가헤르츠를 훑은 결과입니다. 청록 궤적이 가로축을 지나는 초록 점이 공진 주파수입니다. 공진 주파수를 낮추면, 곧 안테나를 길게 하면 마커가 위쪽으로 가고, 높이면 아래쪽으로 갑니다. 큐를 키우면 같은 주파수 범위에서 궤적이 원을 따라 더 길게 퍼지고, 아래의 에스더블유알 곡선이 좁아집니다. 연한 초록 띠가 에스더블유알 2 이하인 대역입니다."],
+["s5",".answer",0,"5장의 결론입니다. 스윕 궤적이 가로축을 지나는 곳이 공진 주파수입니다. 급전점에서 쟀을 때 운용 주파수의 점이 위쪽이면 안테나가 길고, 아래쪽이면 짧습니다."],
+
+["s6","h2",0,"6장. 케이블을 거치면 점이 중심을 돌아갑니다. 질문은, 안테나는 그대로인데 케이블을 바꾸면 알 더하기 제이 엑스가 왜 달라지는가입니다."],
+["s6",".plates",0,"기호 둘입니다. 엘은 급전선의 길이입니다. 브이에프는 속도 계수로, 케이블 속에서 파가 진행하는 속도와 빛의 속도의 비입니다. 동축 케이블은 대략 0.66에서 0.85입니다."],
+["s6",".prose",0,"2편 4장에서 안테나로부터 떨어진 곳의 반사 화살표는 e의 마이너스 제이 2 베타 디 승만큼 회전했습니다. 케이블 끝에서 브이엔에이가 보는 감마도 마찬가지입니다. 감마 인은 감마 엘 곱하기 e의 마이너스 제이 2 베타 엘 승입니다. 크기는 그대로이고 각도만 줄어들므로, 차트 위에서 점은 에스더블유알 원을 따라 시계 방향으로 돕니다. 그래서 손실이 없다면 길이와 상관없이 에스더블유알은 같지만 알 더하기 제이 엑스는 달라집니다. 회전각은 720도 곱하기, 길이 나누기 케이블 속 파장입니다. 예를 들어 7.1메가헤르츠의 파장은 약 42.2미터, 속도 계수 0.66인 동축 속에서는 약 27.9미터입니다. 이 케이블 10미터는 약 0.36파장이라 감마는 약 258도 회전합니다. 특별한 길이가 둘 있습니다. 4분의 1 파장이면 180도 돌아 소문자 제트가 1 나누기 제트로 바뀝니다. 100옴이 25옴으로 보이는 이유입니다. 2분의 1 파장이면 한 바퀴 돌아 제자리입니다. 손실이 있는 케이블에서는 반사파가 오가는 동안 약해져, 점이 중심 쪽으로 감겨 드는 나선을 그립니다. 안테나에서 에스더블유알 3인 경우, 손실 1데시벨인 케이블을 거치면 무선실에서는 약 2.3으로 보입니다."],
+["s6",".stage",0,"그림에서 흐린 점은 안테나 급전점, 진한 점은 브이엔에이가 있는 케이블 끝입니다. 케이블 길이를 늘리면 점이 점선 에스더블유알 원을 따라 시계 방향으로 돌고, 2분의 1 파장마다 제자리로 옵니다. 손실을 넣으면 갈색 경로가 중심 쪽으로 감겨 듭니다."],
+["s6",".prose",1,"나노 브이엔에이의 일렉트리컬 딜레이, 전기적 지연 기능은 이 회전을 계산으로 되돌립니다. 케이블의 지연 시간을 넣으면 점이 반대 방향으로 돌아가 급전점에서 잰 것에 가까운 값을 보여 줍니다. 손실까지 되돌리지는 못하고, 설정 방식은 펌웨어마다 다르니 설명서를 확인해야 합니다. 5장의 위쪽이면 길다는 규칙은 급전점에서 잰 값에만 맞습니다. 케이블 끝에서 잴 때는 이 기능으로 회전을 되돌리거나, 2분의 1 파장의 배수인 케이블을 쓰면 됩니다."],
+["s6",".answer",0,"6장의 결론이자 세 번째 질문의 답입니다. 케이블은 감마를 에스더블유알 원을 따라 회전시킵니다. 손실이 없으면 에스더블유알은 그대로이고 알 더하기 제이 엑스만 바뀌며, 손실이 있으면 점이 중심 쪽으로 감겨 에스더블유알이 실제보다 좋아 보입니다."],
+
+["s7","h2",0,"마무리입니다. 세 편을 한 줄로 정리해 봅니다."],
+["s7",".table-wrap",0,"1편은 임피던스의 플러스 제이와 마이너스 제이 성분이 지워지는 공진, 차트 위에서는 가로축이었습니다. 2편은 반사 화살표가 0이 되는 정합, 차트의 중심이었습니다. 3편은 그 화살표가 놓이는 자리 전체, 곧 스미스 차트였습니다."],
+["s7",".table-wrap",1,"나노 브이엔에이 화면 점검표입니다. 점이 중심에 있으면 정합, 가로축 위에 있으면 공진입니다. 위쪽이면 유도성, 아래쪽이면 용량성이고, 급전점에서 쟀다면 안테나가 길거나 짧다는 뜻입니다. 점이 바깥 원에 붙어 있으면 전부 반사, 단락이나 개방이므로 케이블과 커넥터를 확인합니다. 케이블을 바꿨더니 알 더하기 제이 엑스만 바뀌고 에스더블유알은 같다면 케이블에 의한 회전으로 정상입니다. 궤적이 중심 쪽으로 감겨 들고 에스더블유알이 지나치게 좋다면 케이블 손실을 의심합니다."],
+["s7",".prose",0,"세 편 모두 같은 도구 하나를 썼습니다. 회전하는 화살표, 자연상수 e의 제이 세타 승입니다. 스미스 차트는 그 화살표가 놓일 수 있는 모든 자리에 임피던스 눈금을 적어 둔 지도입니다."],
+["s7",".next",0,"무선 공식, 수학으로 보기는 세 편으로 마칩니다. 들어 주셔서 감사합니다."]
+];
+</script>
+<script>
+(function(){
+  const S = window.speechSynthesis;
+  const DATA = window.NARR || [];
+  if (!DATA.length) return;
+  if (!S || !window.SpeechSynthesisUtterance){
+    /* in-app browsers (e.g. Android WebView) have no speech synthesis: keep the button, explain, offer a real browser */
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    const url = location.href.split('#')[0];
+    const android = /Android/i.test(navigator.userAgent);
+    const openHref = android ? 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end' : url;
+    const box = document.createElement('div'); box.className = 'listen';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'narr-all';
+    btn.innerHTML = '<span class="ic" aria-hidden="true">▶</span>처음부터 듣기';
+    const note = document.createElement('span'); note.className = 'narr-note';
+    note.textContent = '기기 음성으로 읽고, 읽는 곳으로 화면이 따라갑니다.';
+    const msg = document.createElement('div'); msg.className = 'narr-unsup'; msg.hidden = true;
+    msg.innerHTML = '<p>이 앱 화면에서는 듣기 기능을 쓸 수 없습니다. 크롬이나 사파리 같은 브라우저에서 열면 들을 수 있습니다.</p>' +
+      '<div class="unsup-actions"><a class="btnlink" target="_blank" rel="noopener">브라우저에서 열기</a><button type="button" class="alt">주소 복사</button></div>';
+    msg.querySelector('a').href = openHref;
+    const cp = msg.querySelector('button');
+    cp.addEventListener('click', () => {
+      const done = () => { cp.textContent = '복사했습니다'; };
+      const legacy = () => {
+        const t = document.createElement('textarea'); t.value = url; t.setAttribute('readonly', '');
+        t.style.position = 'absolute'; t.style.left = '-9999px'; document.body.appendChild(t); t.select();
+        try { document.execCommand('copy'); done(); } catch(e){ cp.textContent = url; }
+        document.body.removeChild(t);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, legacy);
+      else legacy();
+    });
+    btn.addEventListener('click', () => { msg.hidden = !msg.hidden; });
+    box.appendChild(btn); box.appendChild(note); box.appendChild(msg);
+    const h1 = hero.querySelector('h1');
+    if (h1) h1.insertAdjacentElement('afterend', box); else hero.appendChild(box);
+    return;
+  }
+  const emb = () => !!window.__embedOn;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- resolve narration items to page elements ---------- */
+  function resolve(sec, sel, idx){
+    let root = sec === 'hero' ? document.querySelector('.hero') : document.getElementById(sec);
+    if (sel.indexOf('doc:') === 0) return document.querySelectorAll(sel.slice(4))[idx] || root;
+    if (!root) return null;
+    if (!sel) return root;
+    return root.querySelectorAll(sel)[idx] || root;
+  }
+  const items = DATA.map(([sec, sel, idx, text]) => ({sec, el: resolve(sec, sel, idx), text}));
+  function splitSentences(t){
+    return t.replace(/([.?!])\s+/g, '$1\u0001').split('\u0001').map(x => x.trim()).filter(Boolean);
+  }
+  items.forEach(it => it.parts = splitSentences(it.text));
+  function secLabel(sec){
+    if (sec === 'hero') return '머리말';
+    const el = document.getElementById(sec);
+    const tag = el && el.querySelector('.tag');
+    return tag ? tag.textContent.trim() : sec;
+  }
+
+  /* ---------- voice ---------- */
+  let voice = null;
+  function pickVoice(){
+    const vs = S.getVoices().filter(v => /^ko(-|_|$)/i.test(v.lang));
+    if (!vs.length){ voice = null; return; }
+    const score = v => (/natural|neural|online/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 2 : 0) + (/yuna|sunhi|heami|injoon|hyunsu|jimin/i.test(v.name) ? 1 : 0);
+    voice = vs.slice().sort((a, b) => score(b) - score(a))[0];
+  }
+  pickVoice();
+  if (typeof S.addEventListener === 'function') S.addEventListener('voiceschanged', pickVoice);
+  else S.onvoiceschanged = pickVoice;
+  try { S.cancel(); } catch(e){}
+
+  /* ---------- UI ---------- */
+  const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const heroBox = mk('div', 'listen');
+  const allBtn = mk('button', 'narr-all', '<span class="ic" aria-hidden="true">▶</span>처음부터 듣기');
+  allBtn.type = 'button';
+  const note = mk('span', 'narr-note', '기기 음성으로 읽고, 읽는 곳으로 화면이 따라갑니다.');
+  heroBox.appendChild(allBtn); heroBox.appendChild(note);
+  const hero = document.querySelector('.hero');
+  const heroTitle = hero && hero.querySelector('h1');
+  if (heroTitle) heroTitle.insertAdjacentElement('afterend', heroBox);
+  else if (hero) hero.appendChild(heroBox);
+
+  const secs = [];
+  items.forEach((it, i) => { if (it.sec !== 'hero' && secs.indexOf(it.sec) < 0) secs.push(it.sec); });
+  secs.forEach(sec => {
+    const el = document.getElementById(sec);
+    const h2 = el && el.querySelector('h2');
+    if (!h2) return;
+    const b = mk('button', 'narr-sec', '<span class="ic" aria-hidden="true">▶</span>이 장 듣기');
+    b.type = 'button';
+    b.addEventListener('click', () => start(items.findIndex(x => x.sec === sec), sec));
+    h2.insertAdjacentElement('afterend', b);
+  });
+
+  const bar = mk('div', 'narr-bar');
+  bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', '낭독 재생');
+  bar.hidden = true;
+  bar.innerHTML =
+    '<div class="nb-info"><span class="nb-sec"></span><span class="nb-pos"></span></div>' +
+    '<div class="nb-ctrl">' +
+      '<button type="button" class="alt nb-prev" aria-label="이전 문단">⏮</button>' +
+      '<button type="button" class="nb-play" aria-label="일시정지">❚❚</button>' +
+      '<button type="button" class="alt nb-next" aria-label="다음 문단">⏭</button>' +
+      '<label class="nb-rate">속도 <select id="narrRate"><option value="0.8">0.8×</option><option value="0.9">0.9×</option><option value="1" selected>1.0×</option><option value="1.1">1.1×</option><option value="1.2">1.2×</option></select></label>' +
+      '<button type="button" class="alt nb-close" aria-label="낭독 닫기">✕</button>' +
+    '</div>' +
+    '<div class="nb-msg" hidden></div>';
+  document.body.appendChild(bar);
+  function placeBar(){
+    if (!emb() || bar.hidden) return;
+    const v = window.__embedView; if (!v) return;
+    const bh = bar.offsetHeight || 64, dh = document.documentElement.scrollHeight;
+    bar.style.top = Math.max(0, Math.min(dh - bh, v.top + v.height - bh)) + 'px';
+  }
+  document.addEventListener('embedview', placeBar);
+  const $ = s => bar.querySelector(s);
+  const secEl = $('.nb-sec'), posEl = $('.nb-pos'), playBtn = $('.nb-play'), rateSel = $('#narrRate'), msgEl = $('.nb-msg');
+
+  /* ---------- engine ---------- */
+  let i = 0, k = 0, gen = 0, playing = false, onlySec = null, active = null;
+  function setActive(el){
+    if (active) active.classList.remove('narr-on');
+    active = el;
+    if (el){
+      el.classList.add('narr-on');
+      const r = el.getBoundingClientRect();
+      if (emb()){
+        const v = window.__embedView, H = v && v.height ? v.height : window.innerHeight;
+        const off = Math.max(56, H * 0.1);
+        const y = r.top + window.scrollY - off + H / 2;
+        try { window.parent.postMessage({type: 'antenna-types:scrollto', y: y, smooth: !reduce}, '*'); } catch(e){}
+      } else {
+        const off = Math.max(56, window.innerHeight * 0.1);
+        window.scrollTo({top: Math.max(0, r.top + window.scrollY - off), behavior: reduce ? 'auto' : 'smooth'});
+      }
+    }
+  }
+  function updateBar(){
+    const it = items[i];
+    secEl.textContent = secLabel(it.sec);
+    const same = items.filter(x => x.sec === it.sec);
+    posEl.textContent = (same.indexOf(it) + 1) + ' / ' + same.length;
+    playBtn.textContent = playing ? '❚❚' : '▶';
+    playBtn.setAttribute('aria-label', playing ? '일시정지' : '재생');
+  }
+  function showMsg(t){ msgEl.textContent = t; msgEl.hidden = !t; }
+  function speakPart(g){
+    if (g !== gen || !playing) return;
+    const it = items[i];
+    if (k >= it.parts.length){
+      const n = i + 1;
+      if (n < items.length && (!onlySec || items[n].sec === onlySec)){
+        i = n; k = 0; setActive(items[i].el); updateBar(); speakPart(g);
+      } else { finish(); }
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(it.parts[k]);
+    u.lang = 'ko-KR';
+    if (voice) u.voice = voice;
+    u.rate = +rateSel.value;
+    u.onend = () => { if (g !== gen) return; k++; speakPart(g); };
+    u.onerror = e => { if (g !== gen) return; if (e && (e.error === 'interrupted' || e.error === 'canceled')) return; k++; speakPart(g); };
+    S.speak(u);
+  }
+  function go(){ gen++; try { S.cancel(); } catch(e){} playing = true; updateBar(); speakPart(gen); }
+  function start(idx, sec){
+    if (idx < 0) return;
+    pickVoice();
+    bar.hidden = false; document.body.classList.add('narr-open');
+    bar.classList.toggle('emb', emb());
+    if (emb()){ try { window.parent.postMessage({type: 'antenna-types:needview'}, '*'); } catch(e){} placeBar(); }
+    if (!voice && S.getVoices().length){
+      showMsg('이 브라우저에는 한국어 음성이 없어 읽을 수 없습니다. 엣지, 크롬, 사파리에서 열어 보십시오.');
+      playing = false; i = idx; updateBar(); return;
+    }
+    showMsg('');
+    onlySec = sec || null; i = idx; k = 0;
+    setActive(items[i].el);
+    go();
+  }
+  function pause(){ playing = false; gen++; try { S.cancel(); } catch(e){} updateBar(); }
+  function finish(){ playing = false; gen++; updateBar(); setActive(null); }
+  function close(){ pause(); setActive(null); bar.hidden = true; document.body.classList.remove('narr-open'); showMsg(''); }
+  function jump(d){
+    const n = Math.max(0, Math.min(items.length - 1, i + d));
+    if (onlySec && items[n].sec !== onlySec) onlySec = items[n].sec;
+    i = n; k = 0; setActive(items[i].el); go();
+  }
+
+  allBtn.addEventListener('click', () => start(0, null));
+  playBtn.addEventListener('click', () => { if (playing) pause(); else { if (!active) { setActive(items[i].el); } go(); } });
+  $('.nb-prev').addEventListener('click', () => jump(k > 0 ? 0 : -1));
+  $('.nb-next').addEventListener('click', () => jump(1));
+  $('.nb-close').addEventListener('click', close);
+  rateSel.addEventListener('change', () => { if (playing) go(); });
+  window.addEventListener('pagehide', () => { try { S.cancel(); } catch(e){} });
+})();
+</script>
+</body>
+</html>
