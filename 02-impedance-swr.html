@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SWR은 무엇을 재는 걸까 · 무선 공식, 수학으로 보기 2편</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<style>
+/* Layout: one narrow reading column of chapters, like a video; each chapter = question → symbol plates → live drawing → derivation */
+:root{
+  color-scheme: dark;
+  --bg:#0a1424;
+  --screen:#0d1a2e;
+  --line:#22324b;
+  --muted:#8b9ab3;
+  --soft:#c6d0e0;
+  --fg:#e7ecf4;
+  --pi:#ff7a9a;
+  --f:#f5d76e;
+  --w:#8ee3f0;
+  --j:#a395ff;
+  --r:#6fd3b0;
+  --l:#f2a54a;
+  --c:#5b9bf0;
+  --btn:#dbe3ef;
+  --btn-hover:#ffffff;
+  --btn-shadow:#05090f;
+  --font-body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-math:"Times New Roman", "STIX Two Math", serif;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.75;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 48px}
+main{max-width:760px;margin:0 auto}
+h1,h2,h3{text-wrap:balance;line-height:1.35;margin:0}
+p{margin:0}
+a{color:var(--w)}
+strong{color:var(--fg)}
+.hero{padding-block:56px 28px;display:grid;gap:18px;text-align:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;color:var(--muted)}
+.hero h1{font-size:clamp(26px,5vw,36px);font-weight:700}
+.hero .big{font-size:clamp(26px,6.4vw,44px);padding-block:10px;overflow-x:auto}
+.hero .lede{color:var(--soft);max-width:58ch;margin:0 auto}
+.qs{display:grid;gap:6px;justify-content:center;padding:0;margin:0;list-style:none;color:var(--fg);font-weight:600}
+.qs li::before{content:"Q. ";color:var(--muted);font-weight:400}
+.cast{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0;margin:6px 0 0;list-style:none}
+.cast-label{font-size:13px;color:var(--muted);margin-top:4px}
+.cast a{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--muted);border-radius:999px;color:var(--fg);background:var(--line);text-decoration:none;font-size:14px;font-weight:600;box-shadow:0 2px 0 var(--btn-shadow);transition:background .15s, transform .08s}
+.cast a::after{content:"↓";font-size:12px;color:var(--soft)}
+.cast a:hover,.cast a:focus-visible{background:#2d4062;border-color:var(--fg)}
+.cast a:active{transform:translateY(2px);box-shadow:none}
+.scene{display:grid;gap:18px;padding-block:44px;border-top:1px solid var(--line)}
+.tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--muted)}
+.scene h2{font-size:clamp(21px,3.6vw,26px);font-weight:700}
+.scene h2 em{font-style:normal}
+.ask{font-size:17px;font-weight:600;color:var(--fg);padding-left:14px;border-left:3px solid var(--muted)}
+.prose{display:grid;gap:12px;max-width:65ch;color:var(--soft)}
+.math{overflow-x:auto;overflow-y:hidden;padding-block:4px;color:var(--fg)}
+.plates{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.plate{display:grid;grid-template-columns:44px minmax(0,1fr);gap:2px 12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--screen);min-width:0}
+.plate .s{grid-row:span 3;font-family:var(--font-math);font-style:italic;font-size:32px;line-height:1.1;text-align:center}
+.plate .rd{font-weight:600;font-size:15px}
+.plate .rd small{font-weight:400;color:var(--muted);font-size:13px;margin-left:6px}
+.plate .o{font-size:13.5px;color:var(--soft);line-height:1.6}
+.plate .u{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+.stage{background:var(--screen);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.stage canvas{display:block;width:100%}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);font-size:14px}
+.controls label{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.controls input[type=range]{width:min(220px,56vw);accent-color:var(--fg)}
+.controls select,.controls input[type=number]{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px 6px;font:inherit}
+button{font:inherit;font-size:14px;font-weight:600;line-height:1.2;color:var(--bg);background:var(--btn);border:0;border-radius:6px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 0 var(--btn-shadow);transition:background .15s, transform .08s}
+button:hover{background:var(--btn-hover)}
+button:active{transform:translateY(2px);box-shadow:none}
+button.alt{color:var(--fg);background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted)}
+button.alt:hover{background:var(--line)}
+button .ic{font-size:12px;opacity:.85}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--w);outline-offset:2px}
+.read{font-family:var(--font-body);font-variant-numeric:tabular-nums;font-size:13.5px;color:var(--fg)}
+.read.lines{display:grid;gap:2px}
+.state{display:flex;align-items:baseline;gap:10px;color:var(--muted);font-size:13px;cursor:default}
+.chips{display:flex;gap:4px}
+.chips b{font-family:var(--font-math);font-style:italic;font-weight:400;font-size:18px;padding:0 6px;color:var(--muted);opacity:.45;border-bottom:2px solid transparent}
+.chips b.on{color:var(--j);opacity:1;border-bottom-color:var(--j)}
+.answer{display:block;padding:12px 16px;background:var(--screen);border-left:3px solid var(--k, var(--muted));font-weight:600;color:var(--fg)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:680px){.cards{grid-template-columns:1fr}}
+.card{display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;padding:16px;background:var(--screen);border:1px solid var(--line);border-radius:6px;min-width:0}
+.card .top{display:flex;align-items:center;gap:12px}
+.card .top svg{width:56px;height:56px;flex:none}
+.card h3{font-size:16px}
+.card p{font-size:14.5px;color:var(--soft)}
+.card .math{font-size:15px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:15px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:500;color:var(--muted);font-size:13px}
+tr.hit td{color:var(--fg);font-weight:700;background:rgba(255,122,154,.08)}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:680px){.duo{grid-template-columns:1fr}}
+.duo>div{min-width:0}
+.duo>div+div{border-left:1px solid var(--line)}
+@media (max-width:680px){.duo>div+div{border-left:0;border-top:1px solid var(--line)}}
+.cap{padding:10px 14px 0;font-size:13px;color:var(--muted)}
+.status{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.pill{font-size:13px;font-weight:600;padding:2px 10px;border-radius:999px;border:1px solid currentColor}
+.calc{display:grid;gap:2px;padding:14px;border-top:1px solid var(--line)}
+.calc div{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr);gap:12px;font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:14px}
+.calc div span:first-child{color:var(--muted)}
+.calc div.end span{color:var(--pi);font-weight:600}
+.guide{display:grid;gap:4px;margin:0;padding:12px 14px;border-top:1px solid var(--line);font-size:14px;line-height:1.65}
+.guide div{display:grid;grid-template-columns:3.2em minmax(0,1fr);gap:8px}
+.guide dt{color:var(--muted);font-weight:600}
+.guide dd{margin:0;color:var(--soft)}
+nav.series{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding-block:14px;border-bottom:1px solid var(--line);font-size:13.5px}
+nav.series .sname{color:var(--muted);margin-right:auto}
+nav.series a{color:var(--fg);text-decoration:none;padding:4px 12px;border-radius:999px;border:1px solid var(--muted);background:var(--line);font-weight:600}
+nav.series a:not([aria-current])::after{content:" →";color:var(--soft)}
+nav.series a:hover{background:#2d4062;border-color:var(--fg)}
+nav.series a[aria-current]{color:var(--bg);background:var(--fg);border-color:var(--fg);font-weight:600}
+.ladder{display:block;width:100%;height:auto;max-height:170px;padding:10px}
+.presets .lbl{color:var(--muted);font-size:13px}
+.presets button{font-size:13px;padding:6px 11px}
+.listen{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center}
+.narr-note{color:var(--muted);font-size:13px;text-align:center}
+.narr-sec{justify-self:start;font-size:13px;padding:6px 12px}
+.narr-on{outline:2px solid var(--j);outline-offset:6px;border-radius:6px;background:rgba(163,149,255,.06)}
+.narr-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center;padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));background:var(--screen);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.35)}
+.narr-bar .nb-info{display:flex;gap:10px;align-items:baseline;font-size:13px;color:var(--soft)}
+.nb-pos{color:var(--muted);font-variant-numeric:tabular-nums}
+.nb-ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nb-ctrl button{min-width:40px;justify-content:center;padding:7px 10px}
+.nb-rate{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+.nb-rate select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px 6px;font:inherit}
+.nb-msg{flex-basis:100%;text-align:center;font-size:13px;color:var(--l)}
+body.narr-open{padding-bottom:120px}
+.next{padding:20px;border:1px dashed var(--muted);border-radius:6px;display:grid;gap:8px;color:var(--soft)}
+footer{padding-block:32px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px}
+</style>
+<script>
+window.MathJax = {
+  loader:{load:['[tex]/color']},
+  tex:{
+    inlineMath:[['\\(','\\)']], displayMath:[['\\[','\\]']],
+    packages:{'[+]':['color']},
+    macros:{
+      cZ:['{\\color[RGB]{255,122,154}{#1}}',1],
+      cO:['{\\color[RGB]{245,215,110}{#1}}',1],
+      cG:['{\\color[RGB]{142,227,240}{#1}}',1],
+      cP:['{\\color[RGB]{255,122,154}{#1}}',1],
+      cF:['{\\color[RGB]{245,215,110}{#1}}',1],
+      cW:['{\\color[RGB]{142,227,240}{#1}}',1],
+      cJ:['{\\color[RGB]{163,149,255}{#1}}',1],
+      cR:['{\\color[RGB]{111,211,176}{#1}}',1],
+      cL:['{\\color[RGB]{242,165,74}{#1}}',1],
+      cC:['{\\color[RGB]{91,155,240}{#1}}',1]
+    }
+  },
+  svg:{fontCache:'global'}
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+</head>
+<body>
+<main>
+  <nav class="series" aria-label="연작"><span class="sname">무선 공식, 수학으로 보기</span><a href="index.html">1편 공진 공식</a><a href="02-impedance-swr.html" aria-current="page">2편 임피던스와 SWR</a></nav>
+  <header class="hero">
+    <div class="eyebrow">무선 공식, 수학으로 보기 · 2편</div>
+    <h1>SWR은 무엇을 재는 걸까</h1>
+    <div class="big math">\[ \text{SWR} = \frac{1+|\cG{\Gamma}|}{1-|\cG{\Gamma}|}, \qquad \cG{\Gamma} = \frac{\cZ{Z_L} - \cO{Z_0}}{\cZ{Z_L} + \cO{Z_0}} \]</div>
+    <p class="lede">송신기와 안테나 사이에서 가장 자주 확인하는 숫자가 SWR입니다. 1편에서 공진을 회전 벡터로 설명했다면, 이번에는 같은 방법으로 반사와 정재파를 설명합니다.</p>
+    <ul class="qs">
+      <li>왜 50 Ω에 맞추면 반사가 없을까?</li>
+      <li>정재파는 왜 생기고, SWR은 무엇과 무엇의 비일까?</li>
+      <li>안테나가 공진하면 SWR은 항상 1일까?</li>
+    </ul>
+    <p class="lede">1편의 마지막에 나온 비스듬한 화살표, 임피던스 Z에서 시작합니다.</p>
+    <p class="cast-label">목차 · 누르면 그 장으로 이동합니다</p>
+    <ul class="cast" aria-label="목차">
+      <li><a href="#s1">1 임피던스와 위상각</a></li>
+      <li><a href="#s2">2 급전선과 Z₀</a></li>
+      <li><a href="#s3">3 반사계수 Γ</a></li>
+      <li><a href="#s4">4 정재파</a></li>
+      <li><a href="#s5">5 SWR의 의미</a></li>
+      <li><a href="#s6">6 공진과 정합</a></li>
+      <li><a href="#s7">마무리</a></li>
+    </ul>
+  </header>
+
+  <!-- 1 -->
+  <section class="scene" id="s1">
+    <div class="tag">1 · 임피던스</div>
+    <h2>임피던스는 크기와 각도를 가진 화살표입니다</h2>
+    <p class="ask">공진에서 벗어나면 전압과 전류는 어떻게 될까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s" style="color:var(--pi)">Z</div><div class="rd">impedance</div><div class="o">임피던스. 저항 R과 리액턴스 X를 합한 복소수입니다.</div><div class="u">Ω (옴)</div></div>
+      <div class="plate"><div class="s" style="color:var(--pi)">φ</div><div class="rd">파이 <small>phi · phase angle</small></div><div class="o">위상각. π와 같은 이름으로 읽지만 다른 글자입니다(그리스 문자 phi의 소문자).</div><div class="u">° 또는 rad</div></div>
+    </div>
+    <div class="prose">
+      <p>1편에서 직렬 RLC 회로의 임피던스는 \(Z = \cR{R} + \cJ{j}X\)였습니다. 공진하면 X = 0이 되어 Z는 실수축 위에 놓이지만, 공진에서 벗어나면 실수축에서 기울어진 화살표가 됩니다. 이 화살표는 길이와 각도로도 적을 수 있습니다.</p>
+      <div class="math">\[ \cZ{Z} = \cR{R} + \cJ{j}X = |\cZ{Z}|\,e^{\cJ{j}\cZ{\varphi}}, \qquad |\cZ{Z}| = \sqrt{\cR{R}^2 + X^2}, \qquad \cZ{\varphi} = \tan^{-1}\frac{X}{\cR{R}} \]</div>
+      <p>전압은 V = ZI입니다. 오일러 공식에서 지수끼리 곱하면 각도가 더해지므로, 전압 화살표는 전류 화살표보다 <strong>|Z|배 길고 φ만큼 앞서</strong> 회전합니다.</p>
+      <div class="math">\[ V = |\cZ{Z}|\,e^{\cJ{j}\cZ{\varphi}} \cdot I_0\,e^{\cJ{j}\cW{\omega} t} = |\cZ{Z}|\,I_0\,e^{\cJ{j}(\cW{\omega} t + \cZ{\varphi})} \]</div>
+    </div>
+    <div class="stage">
+      <canvas id="cvA" aria-label="위상차 φ를 두고 함께 회전하는 전압과 전류 화살표, 두 파형"></canvas>
+      <div class="controls">
+        <label for="rA">R <input type="range" id="rA" min="0" max="100" value="50" style="width:140px"></label>
+        <label for="xA">X <input type="range" id="xA" min="-100" max="100" value="50" style="width:160px"></label>
+        <button type="button" id="pauseA" class="alt">멈춤</button>
+        <span class="read" id="readA"></span>
+      </div>
+      <dl class="guide"><div><dt>조작</dt><dd>R과 X를 바꿉니다. X가 양수면 유도성(코일 쪽), 음수면 용량성(콘덴서 쪽)입니다.</dd></div><div><dt>관찰</dt><dd>X가 양수면 전압(분홍)이 전류(흰색)보다 앞서 회전하고, 음수면 뒤따릅니다. X = 0이면 두 화살표의 방향이 같아지고 두 파형의 마루가 겹칩니다.</dd></div><div><dt>의미</dt><dd>임피던스의 각도 φ가 곧 전압과 전류의 위상차입니다.</dd></div></dl>
+    </div>
+    <div class="prose">
+      <p>전력을 실제로 소비하는 것은 저항 성분 R뿐입니다. 리액턴스 성분 X는 한 주기 동안 에너지를 저장했다가 그대로 돌려줍니다.</p>
+    </div>
+    <div class="answer" style="--k:var(--pi)">임피던스는 전압 화살표가 전류 화살표보다 몇 배 길고(|Z|), 몇 도 앞서는지(φ)를 함께 나타냅니다.</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="scene" id="s2">
+    <div class="tag">2 · 급전선</div>
+    <h2>급전선에는 고유한 임피던스가 있습니다</h2>
+    <p class="ask">동축 케이블에 적힌 50 Ω은 무엇의 50 Ω일까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s" style="color:var(--f)">Z₀</div><div class="rd">characteristic impedance</div><div class="o">특성 임피던스. 급전선의 단면 구조로 정해지는 값입니다.</div><div class="u">Ω (옴)</div></div>
+    </div>
+    <div class="prose">
+      <p>급전선은 아주 짧은 코일과 콘덴서가 끝없이 이어진 구조로 볼 수 있습니다. 두 도체를 따라 흐르는 전류는 자기장을 만들고(코일), 두 도체 사이에는 전기장이 생깁니다(콘덴서). 1 m당 인덕턴스를 L′, 1 m당 정전용량을 C′이라고 합니다.</p>
+    </div>
+    <div class="stage">
+      <svg class="ladder" viewBox="0 0 640 150" role="img" aria-label="코일과 콘덴서가 반복되는 급전선 등가 회로">
+        <line x1="20" y1="40" x2="40" y2="40" style="stroke:var(--muted)" stroke-width="2"/>
+        <line x1="20" y1="120" x2="620" y2="120" style="stroke:var(--muted)" stroke-width="2"/>
+        <g id="ladderUnit">
+          <path d="M40 40 q10 -18 20 0 q10 -18 20 0 q10 -18 20 0 q10 -18 20 0" fill="none" style="stroke:var(--l)" stroke-width="2.5"/>
+          <line x1="120" y1="40" x2="160" y2="40" style="stroke:var(--muted)" stroke-width="2"/>
+          <line x1="140" y1="40" x2="140" y2="74" style="stroke:var(--muted)" stroke-width="2"/>
+          <line x1="126" y1="74" x2="154" y2="74" style="stroke:var(--c)" stroke-width="3"/>
+          <line x1="126" y1="84" x2="154" y2="84" style="stroke:var(--c)" stroke-width="3"/>
+          <line x1="140" y1="84" x2="140" y2="120" style="stroke:var(--muted)" stroke-width="2"/>
+        </g>
+        <use href="#ladderUnit" x="120"/>
+        <use href="#ladderUnit" x="240"/>
+        <use href="#ladderUnit" x="360"/>
+        <line x1="520" y1="40" x2="560" y2="40" style="stroke:var(--muted)" stroke-width="2"/>
+        <text x="580" y="45" style="fill:var(--muted)" font-size="16">…</text>
+        <text x="80" y="22" text-anchor="middle" style="fill:var(--l)" font-size="15" font-style="italic" font-family="Times New Roman, serif">L′Δz</text>
+        <text x="164" y="83" style="fill:var(--c)" font-size="15" font-style="italic" font-family="Times New Roman, serif">C′Δz</text>
+      </svg>
+    </div>
+    <div class="prose">
+      <p>이 구조 위를 한 방향으로 진행하는 파는 어느 지점에서나 전압과 전류의 비가 같습니다. 손실을 무시하면 그 비는 다음과 같습니다.</p>
+      <div class="math">\[ \cO{Z_0} = \sqrt{\frac{\cL{L'}}{\cC{C'}}} \]</div>
+      <p>1편의 공진 공식에는 \(\sqrt{\cL{L}\cC{C}}\)가 있었다면, 여기에는 비 \(\cL{L'}/\cC{C'}\)의 제곱근이 있습니다. 예를 들어 1 m당 \(\cL{L'} \approx 250\ \text{nH}\), \(\cC{C'} \approx 100\ \text{pF}\)인 동축 케이블은</p>
+      <div class="math">\[ \cO{Z_0} = \sqrt{\frac{250\times10^{-9}}{100\times10^{-12}}} = \sqrt{2500} = 50\ \Omega \]</div>
+      <p>세 가지를 기억해 두면 좋습니다. Z₀는 실수이므로 진행파의 전압과 전류는 동위상입니다. Z₀는 L′과 C′의 비로 정해지므로 <strong>케이블 길이와 무관</strong>합니다. 그리고 저항계로 양 끝을 재서 나오는 값이 아닙니다.</p>
+    </div>
+    <div class="answer" style="--k:var(--f)">Z₀는 급전선 위를 진행하는 파가 요구하는 전압과 전류의 비입니다.</div>
+  </section>
+
+  <!-- 3 -->
+  <section class="scene" id="s3">
+    <div class="tag">3 · 반사</div>
+    <h2>두 조건이 부딪히는 곳에서 반사가 생깁니다</h2>
+    <p class="ask">급전선 끝의 안테나가 50 Ω이 아니면 어떻게 될까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s" style="color:var(--pi)">Z<sub>L</sub></div><div class="rd">load impedance</div><div class="o">부하 임피던스. 급전선 끝에 연결된 안테나의 임피던스입니다.</div><div class="u">Ω (옴)</div></div>
+      <div class="plate"><div class="s" style="color:var(--w)">Γ</div><div class="rd">감마 <small>reflection coefficient</small></div><div class="o">반사계수. 그리스 문자 감마의 대문자입니다.</div><div class="u">단위 없음 · 크기 0~1</div></div>
+    </div>
+    <div class="prose">
+      <p>급전선은 전압과 전류의 비로 Z₀를 요구하는데, 끝에 달린 안테나는 자기 임피던스 Z<sub>L</sub>을 요구합니다. 둘이 다르면 두 조건을 동시에 만족시키기 위해 파의 일부가 되돌아갑니다. 안테나 쪽으로 가는 진행파를 V⁺, 되돌아오는 반사파를 V⁻라고 하면, 급전선 끝에서 전압은 둘의 합이고 전류는 차입니다. 반사파는 반대 방향으로 흐르기 때문입니다.</p>
+      <div class="math">\[ V = V^{+} + V^{-}, \qquad I = \frac{V^{+} - V^{-}}{\cO{Z_0}} \]</div>
+      <p>급전선 끝에서 V / I는 안테나의 임피던스 Z<sub>L</sub>이어야 합니다.</p>
+      <div class="math">\[ \cZ{Z_L} = \cO{Z_0}\,\frac{V^{+} + V^{-}}{V^{+} - V^{-}} \]</div>
+      <p>반사파와 진행파의 비를 반사계수 \(\cG{\Gamma} = V^{-}/V^{+}\)로 두고 분자와 분모를 V⁺로 나누어 정리하면 다음과 같습니다.</p>
+      <div class="math">\[ \cZ{Z_L} = \cO{Z_0}\,\frac{1+\cG{\Gamma}}{1-\cG{\Gamma}} \qquad\Longrightarrow\qquad \cG{\Gamma} = \frac{\cZ{Z_L} - \cO{Z_0}}{\cZ{Z_L} + \cO{Z_0}} \]</div>
+      <p>Γ도 복소수, 즉 화살표입니다. 길이 |Γ|는 반사파가 진행파의 몇 배인지, 각도는 반사될 때 위상이 얼마나 바뀌는지를 나타냅니다. 몇 가지 경우를 넣어 보면 이렇습니다.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>안테나 Z<sub>L</sub> (Z₀ = 50 Ω)</th><th>Γ</th><th>의미</th></tr></thead>
+        <tbody>
+          <tr class="hit"><td>50 Ω</td><td>0</td><td>반사 없음 (정합)</td></tr>
+          <tr><td>0 Ω (단락)</td><td>−1</td><td>전부 반사, 위상 반전</td></tr>
+          <tr><td>∞ (개방)</td><td>+1</td><td>전부 반사, 위상 그대로</td></tr>
+          <tr><td>25 Ω</td><td>−1/3</td><td>1/3 반사, 위상 반전</td></tr>
+          <tr><td>100 Ω</td><td>+1/3</td><td>1/3 반사, 위상 그대로</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>단락의 Γ = −1은 1편의 \(e^{\cJ{j}\pi} = -1\), 즉 반 회전입니다. 반사파가 진행파와 정반대 방향의 화살표로 되돌아온다는 뜻입니다.</p>
+    </div>
+    <div class="stage">
+      <canvas id="cvB" aria-label="반사계수 Γ를 단위원 안의 화살표로 나타낸 평면"></canvas>
+      <div class="controls">
+        <label for="rB">R<sub>L</sub> <input type="range" id="rB" min="0" max="200" value="100" style="width:150px"></label>
+        <label for="xB">X<sub>L</sub> <input type="range" id="xB" min="-150" max="150" value="0" style="width:150px"></label>
+      </div>
+      <div class="controls presets">
+        <span class="lbl">부하 예</span>
+        <button type="button" class="alt" data-r="50" data-x="0">50 Ω 정합</button>
+        <button type="button" class="alt" data-r="0" data-x="0">단락</button>
+        <button type="button" class="alt" data-open="1">개방</button>
+        <button type="button" class="alt" data-r="25" data-x="0">25 Ω</button>
+        <button type="button" class="alt" data-r="100" data-x="0">100 Ω</button>
+        <button type="button" class="alt" data-r="50" data-x="50">50 + j50 Ω</button>
+      </div>
+      <div class="status"><div class="read lines" id="readB"></div></div>
+      <dl class="guide"><div><dt>조작</dt><dd>슬라이더로 안테나의 저항 R<sub>L</sub>과 리액턴스 X<sub>L</sub>을 바꾸거나, 부하 예 버튼으로 대표적인 경우를 고릅니다.</dd></div><div><dt>관찰</dt><dd>청록색 Γ 화살표는 항상 바깥 원(|Γ| = 1) 안에 있습니다. 50 Ω에서 길이가 0이 되고, 단락은 왼쪽 끝, 개방은 오른쪽 끝입니다. 점선 원은 SWR 1.5, 2, 3인 지점입니다.</dd></div><div><dt>의미</dt><dd>Γ의 길이가 반사의 크기, 각도가 반사 위상입니다. 중심에 가까울수록 정합에 가깝습니다.</dd></div></dl>
+    </div>
+    <div class="answer" style="--k:var(--w)">Γ = 0이 되는 조건은 Z<sub>L</sub> = Z₀ 하나뿐입니다. 그래서 50 Ω 급전선에는 50 Ω 부하를 맞춥니다.</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="scene" id="s4">
+    <div class="tag">4 · 정재파</div>
+    <h2>두 화살표가 겹치는 각도가 위치마다 다릅니다</h2>
+    <p class="ask">진행파와 반사파가 함께 있으면 급전선 위에서는 무엇이 보일까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s" style="color:var(--f)">β</div><div class="rd">베타 <small>phase constant</small></div><div class="o">위상 상수. 급전선을 1 m 따라갈 때 회전 벡터가 회전하는 각도입니다. β = 2π/λ.</div><div class="u">rad/m</div></div>
+    </div>
+    <div class="prose">
+      <p>급전선 위 한 지점의 전압은 진행파와 반사파, 두 회전 벡터의 합입니다. 안테나에서 송신기 쪽으로 거리 d만큼 떨어진 곳을 보면, 진행파는 안테나에 도착하기까지 d만큼 덜 왔고 반사파는 안테나에서 d만큼 더 갔습니다. 그래서 두 화살표 사이의 각도는 <strong>왕복 거리 2d만큼</strong>, 즉 2βd만큼 달라집니다.</p>
+      <div class="math">\[ V(d) = V^{+} e^{\cJ{j}\cO{\beta} d}\big(1 + \cG{\Gamma}\,e^{-\cJ{j}2\cO{\beta} d}\big) \]</div>
+      <p>괄호 안을 보면 길이 1인 화살표에 길이 |Γ|인 화살표가 이어 붙어 있고, 뒤쪽 화살표는 d에 따라 회전합니다. 두 화살표가 같은 방향이면 합이 최대 1 + |Γ|, 반대 방향이면 최소 1 − |Γ|입니다. 2βd가 π만큼 바뀌는 거리, 곧 <strong>λ/4마다 최대와 최소가 번갈아</strong> 나타납니다.</p>
+    </div>
+    <div class="stage">
+      <canvas id="cvC" aria-label="급전선 위의 진행파, 반사파, 합성파와 정재파 포락선, 측정 위치의 화살표 합"></canvas>
+      <div class="controls">
+        <label for="gC">|Γ| <input type="range" id="gC" min="0" max="100" value="33" style="width:130px"></label>
+        <label for="tC">Γ 각도 <input type="range" id="tC" min="-180" max="180" value="0" style="width:130px"></label>
+        <label for="dC">측정 위치 d <input type="range" id="dC" min="0" max="100" value="25" style="width:150px"></label>
+        <button type="button" id="pauseC" class="alt">멈춤</button>
+      </div>
+      <div class="status"><span class="read" id="readC"></span></div>
+      <dl class="guide"><div><dt>조작</dt><dd>|Γ|로 반사의 크기를, Γ 각도로 반사 위상을, 측정 위치 d로 급전선 위의 지점을 바꿉니다.</dd></div><div><dt>관찰</dt><dd>노랑(진행파)은 오른쪽으로, 청록(반사파)은 왼쪽으로 움직이고, 흰색 합성파는 제자리에서 출렁입니다. 흰 점선 포락선의 높이는 위치마다 다르며 λ/4마다 최대와 최소가 바뀝니다. 왼쪽 아래 그림에서는 d를 움직일 때 청록 화살표가 회전하며 흰 합 화살표의 길이가 변합니다.</dd></div><div><dt>의미</dt><dd>정재파는 두 화살표가 위치에 따라 같은 방향과 반대 방향을 번갈아 이루며 생깁니다. |Γ| = 0이면 포락선이 평평해집니다.</dd></div></dl>
+    </div>
+    <div class="answer" style="--k:var(--f)">정재파의 최대는 1 + |Γ|, 최소는 1 − |Γ|이며, 둘은 λ/4 간격으로 번갈아 나타납니다.</div>
+  </section>
+
+  <!-- 5 -->
+  <section class="scene" id="s5">
+    <div class="tag">5 · SWR</div>
+    <h2>SWR은 정재파의 최대와 최소의 비입니다</h2>
+    <p class="ask">SWR 1.5와 2.0은 실제로 얼마나 다를까?</p>
+    <div class="plates">
+      <div class="plate"><div class="s" style="font-size:22px">SWR</div><div class="rd">standing wave ratio</div><div class="o">정재파비. 전압으로 정의하므로 VSWR이라고도 부릅니다.</div><div class="u">단위 없음 · 1 이상</div></div>
+      <div class="plate"><div class="s" style="font-size:22px">RL</div><div class="rd">return loss</div><div class="o">반사 손실. 반사파가 진행파보다 몇 dB 작은지를 나타냅니다.</div><div class="u">dB (데시벨)</div></div>
+    </div>
+    <div class="prose">
+      <p>4장의 최대와 최소를 나누면 SWR입니다.</p>
+      <div class="math">\[ \text{SWR} = \frac{V_{\max}}{V_{\min}} = \frac{1+|\cG{\Gamma}|}{1-|\cG{\Gamma}|} \qquad\Longleftrightarrow\qquad |\cG{\Gamma}| = \frac{\text{SWR}-1}{\text{SWR}+1} \]</div>
+      <p>|Γ|는 0에서 1 사이이므로 SWR은 1에서 무한대 사이입니다. 최대를 최소로 나눈 값이라 1보다 작아질 수 없습니다. 전력은 전압의 제곱에 비례하므로 반사 전력의 비율은 |Γ|²입니다.</p>
+      <div class="math">\[ \frac{P_{\text{반사}}}{P_{\text{진행}}} = |\cG{\Gamma}|^{2}, \qquad \text{RL} = -20\log_{10}|\cG{\Gamma}|\ \ [\text{dB}] \]</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>SWR</th><th>|Γ|</th><th>반사 전력</th><th>반사 손실 RL</th></tr></thead>
+        <tbody>
+          <tr class="hit"><td>1.0</td><td>0</td><td>0 %</td><td>∞</td></tr>
+          <tr><td>1.2</td><td>0.091</td><td>0.8 %</td><td>20.8 dB</td></tr>
+          <tr><td>1.5</td><td>0.200</td><td>4.0 %</td><td>14.0 dB</td></tr>
+          <tr><td>2.0</td><td>0.333</td><td>11.1 %</td><td>9.5 dB</td></tr>
+          <tr><td>3.0</td><td>0.500</td><td>25.0 %</td><td>6.0 dB</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="stage">
+      <div class="controls">
+        <label for="sK">SWR <input type="number" id="sK" value="1.5" min="1" step="0.1" style="width:84px"></label>
+      </div>
+      <div class="calc" id="calcK" aria-live="polite"></div>
+      <dl class="guide"><div><dt>조작</dt><dd>측정한 SWR 값을 넣습니다.</dd></div><div><dt>관찰</dt><dd>반사계수의 크기, 반사·전달 전력 비율, 반사 손실이 계산됩니다.</dd></div><div><dt>의미</dt><dd>SWR 1.5에서 2.0으로 나빠지면 반사 전력은 4 %에서 11 %로 약 세 배가 됩니다.</dd></div></dl>
+    </div>
+    <div class="prose">
+      <p>반사 전력이 곧 잃어버리는 전력은 아닙니다. 송신기 쪽에 튜너가 있으면 되돌아온 파는 튜너에서 다시 안테나 쪽으로 반사되어 결국 대부분 방사됩니다. 실제 손실은 급전선을 여러 번 오가며 생기는 추가 감쇠이고, 급전선이 길고 손실이 클수록 커집니다. 다만 송신기가 높은 SWR을 직접 보면 보호 회로가 출력을 자동으로 줄이는 경우가 많습니다.</p>
+    </div>
+    <div class="answer">SWR은 반사계수의 크기 |Γ|를 정재파의 최대·최소 비로 나타낸 값이며, 정의상 1 이상입니다.</div>
+  </section>
+
+  <!-- 6 -->
+  <section class="scene" id="s6">
+    <div class="tag">6 · 공진과 정합</div>
+    <h2>공진은 정합의 절반입니다</h2>
+    <p class="ask">안테나가 공진하면 SWR은 항상 1일까?</p>
+    <div class="prose">
+      <p>1편에서 공진은 리액턴스가 상쇄되어 X = 0이 되는 상태였습니다. 공진한 안테나의 임피던스는 실수 R입니다. 그런데 Γ = 0이 되려면 X = 0에 더해 <strong>R = Z₀</strong>여야 합니다. 공진 상태에서 Γ와 SWR은 다음과 같습니다.</p>
+      <div class="math">\[ \cG{\Gamma} = \frac{\cR{R} - \cO{Z_0}}{\cR{R} + \cO{Z_0}}, \qquad \text{SWR} = \frac{\cR{R}}{\cO{Z_0}} \ \text{또는}\ \frac{\cO{Z_0}}{\cR{R}}\ \ (\text{1 이상인 쪽}) \]</div>
+      <p>예를 들어 완전한 접지 위의 1/4파장 버티컬은 공진할 때 약 36 Ω이므로, 50 Ω 급전선에서 SWR은 50/36 ≈ 1.4입니다. 공진했지만 SWR이 1은 아닙니다. 실제 설치에서는 지면 손실과 라디얼 수에 따라 급전점 저항이 이보다 높아져, 오히려 50 Ω에 가까워지기도 합니다.</p>
+      <p>안테나 튜너(정합 회로)는 그래서 두 가지 일을 합니다. 남은 리액턴스를 반대 부호의 리액턴스로 상쇄하고(1편의 공진과 같은 일), 저항을 Z₀로 변환합니다. 실제 튜너는 코일과 콘덴서의 조합으로 두 일을 한 번에 하지만, 아래 그림은 이해하기 쉽게 두 단계로 나누었습니다.</p>
+    </div>
+    <div class="stage">
+      <canvas id="cvD" aria-label="안테나 단독과 튜너를 거친 뒤의 반사계수 위치 비교"></canvas>
+      <div class="controls">
+        <label for="rD">안테나 R <input type="range" id="rD" min="10" max="150" value="36" style="width:120px"></label>
+        <label for="xD">안테나 X <input type="range" id="xD" min="-120" max="120" value="0" style="width:120px"></label>
+      </div>
+      <div class="controls">
+        <label for="sD">① 리액턴스 보정 <input type="range" id="sD" min="-150" max="150" value="0" style="width:120px"></label>
+        <label for="kD">② 저항 변환 <input type="range" id="kD" min="-100" max="100" value="0" style="width:120px"></label>
+        <button type="button" id="autoD"><span class="ic" aria-hidden="true">→</span>튜너 맞추기</button>
+        <button type="button" id="resetD" class="alt"><span class="ic" aria-hidden="true">↺</span>튜너 초기화</button>
+      </div>
+      <div class="controls presets">
+        <span class="lbl">안테나 예</span>
+        <button type="button" class="alt" data-r="36" data-x="0">1/4파장 버티컬 (공진)</button>
+        <button type="button" class="alt" data-r="80" data-x="45">길게 자른 다이폴</button>
+        <button type="button" class="alt" data-r="20" data-x="-100">짧은 버티컬</button>
+      </div>
+      <div class="status"><div class="read lines" id="readD"></div></div>
+      <dl class="guide"><div><dt>조작</dt><dd>안테나의 R과 X를 정하거나 안테나 예를 고른 뒤, ① 리액턴스 보정과 ② 저항 변환을 움직이거나 "튜너 맞추기"를 누릅니다. ② 저항 변환은 이상적인 변압기로 가정해 리액턴스도 같은 비율로 변하며, 실제 튜너가 조정되는 경로와는 다릅니다.</dd></div><div><dt>관찰</dt><dd>흐린 점은 안테나 단독, 밝은 점은 튜너를 거친 뒤의 Γ입니다. ①로 X를 0으로 만들면 점이 가로축 위로 오고, ②로 R을 50 Ω에 맞추면 중심에 도착합니다. 1/4파장 버티컬은 처음부터 가로축 위에 있지만 중심은 아닙니다.</dd></div><div><dt>의미</dt><dd>공진(X = 0)은 Γ를 가로축으로 옮기는 일이고, 정합(Z = Z₀)은 중심으로 옮기는 일입니다.</dd></div></dl>
+    </div>
+    <div class="answer" style="--k:var(--r)">공진은 X = 0, 정합은 Z = Z₀입니다. 공진하더라도 R이 Z₀와 다르면 SWR은 1이 아닙니다.</div>
+  </section>
+
+  <!-- 7 -->
+  <section class="scene" id="s7">
+    <div class="tag">마무리</div>
+    <h2>두 편을 한 줄로 정리하면</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>1편 공진</th><th>2편 정합</th></tr></thead>
+        <tbody>
+          <tr><td>상쇄되는 것</td><td>+j 리액턴스와 −j 리액턴스</td><td>반사파 (Γ = 0)</td></tr>
+          <tr><td>조건</td><td>ωL = 1/(ωC)</td><td>Z<sub>L</sub> = Z₀</td></tr>
+          <tr><td>결과 식</td><td>f₀ = 1/(2π√LC)</td><td>SWR = (1+|Γ|)/(1−|Γ|)</td></tr>
+          <tr><td>회전 벡터로 본 모습</td><td>위아래 화살표가 지워짐</td><td>반사 화살표의 길이가 0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>머리말의 세 질문에 답하면 이렇습니다.</p>
+      <p><strong>50 Ω에 맞추면 반사가 없는 이유:</strong> Γ의 분자 Z<sub>L</sub> − Z₀가 0이 되기 때문입니다. 급전선이 요구하는 비와 안테나가 요구하는 비가 같아 되돌아갈 파가 필요 없습니다.</p>
+      <p><strong>정재파와 SWR:</strong> 진행파와 반사파의 화살표가 위치마다 다른 각도로 더해져 최대와 최소가 생기고, 그 비가 SWR입니다.</p>
+      <p><strong>공진과 SWR:</strong> 공진은 X = 0만 보장합니다. SWR이 1이 되려면 저항까지 Z₀와 같아야 합니다.</p>
+      <p>두 편 모두 같은 도구 하나를 썼습니다. 회전하는 화살표, 곧 \(e^{\cJ{j}\theta}\)입니다. 화살표를 더하고, 돌리고, 지우는 것만으로 공진과 정합을 모두 설명할 수 있습니다.</p>
+    </div>
+    <div class="next">
+      <div class="tag">연작 완결</div>
+      <p>무선 공식, 수학으로 보기는 두 편으로 마칩니다. 처음부터 다시 보려면 <a href="index.html">1편 공진 공식은 어디서 왔을까</a>로 이동하십시오.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>무선 공식, 수학으로 보기 · 2편 임피던스와 SWR</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  const root = getComputedStyle(document.documentElement);
+  const K = n => root.getPropertyValue(n).trim();
+  const COL = {pi:K('--pi'), f:K('--f'), w:K('--w'), j:K('--j'), r:K('--r'), l:K('--l'), c:K('--c'), fg:K('--fg'), muted:K('--muted'), line:K('--line'), screen:K('--screen'), soft:K('--soft')};
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TAU = Math.PI*2, Z0 = 50;
+  const SANS = '"IBM Plex Sans KR", system-ui, sans-serif';
+  const MATHF = '"Times New Roman", "STIX Two Math", serif';
+
+  function fit(cv, h){
+    const w = cv.parentElement.clientWidth || 300;
+    const d = window.devicePixelRatio || 1;
+    const tw = Math.round(w*d), th = Math.round(h*d);
+    if (cv.width !== tw || cv.height !== th){ cv.width = tw; cv.height = th; cv.style.height = h + 'px'; }
+    const g = cv.getContext('2d');
+    g.setTransform(d,0,0,d,0,0);
+    g.clearRect(0,0,w,h);
+    return {g, w, h};
+  }
+  function arrow(g, x1, y1, x2, y2, col, lw){
+    lw = lw || 3;
+    const dx = x2-x1, dy = y2-y1, len = Math.hypot(dx,dy);
+    if (len < 1) return;
+    const ux = dx/len, uy = dy/len, hl = Math.min(11, len*0.5), hw = hl*0.55;
+    g.strokeStyle = col; g.fillStyle = col; g.lineWidth = lw; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2-ux*hl*0.8, y2-uy*hl*0.8); g.stroke();
+    g.beginPath(); g.moveTo(x2,y2); g.lineTo(x2-ux*hl-uy*hw, y2-uy*hl+ux*hw); g.lineTo(x2-ux*hl+uy*hw, y2-uy*hl-ux*hw); g.closePath(); g.fill();
+  }
+  function text(g, s, x, y, col, font, align, base){
+    g.fillStyle = col; g.font = font; g.textAlign = align || 'left'; g.textBaseline = base || 'alphabetic'; g.fillText(s, x, y);
+  }
+  function tag(g, s, x, y, col, font, align){
+    g.font = font; const m = g.measureText(s).width;
+    const x0 = align === 'right' ? x - m : align === 'center' ? x - m/2 : x;
+    g.fillStyle = COL.screen; g.globalAlpha = 0.9; g.fillRect(x0-4, y-14, m+8, 19); g.globalAlpha = 1;
+    text(g, s, x, y, col, font, align);
+  }
+  const fmt = (v, n) => v.toLocaleString('ko-KR', {minimumFractionDigits:n, maximumFractionDigits:n});
+  const sgn = v => (v < 0 ? '−' : '+');
+  function gammaOf(R, X, open){
+    if (open) return {re:1, im:0};
+    const nr = R - Z0, dr = R + Z0, den = dr*dr + X*X;
+    if (den === 0) return {re:-1, im:0};
+    return {re:(nr*dr + X*X)/den, im:(X*dr - nr*X)/den};
+  }
+  const magOf = G => Math.hypot(G.re, G.im);
+  const swrOf = m => m >= 0.9999 ? Infinity : (1+m)/(1-m);
+  const swrTxt = s => isFinite(s) ? fmt(s, 2) : '∞';
+  function setLines(el, arr){ el.textContent = ''; arr.forEach(t => { const d = document.createElement('div'); d.textContent = t; el.appendChild(d); }); }
+
+  function drawPlane(g, cx, cy, rr, compact){
+    g.strokeStyle = COL.line; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(cx-rr-10, cy); g.lineTo(cx+rr+10, cy); g.moveTo(cx, cy-rr-10); g.lineTo(cx, cy+rr+10); g.stroke();
+    g.strokeStyle = COL.muted; g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, rr, 0, TAU); g.stroke();
+    [[0.2,'1.5'],[1/3,'2'],[0.5,'3']].forEach(([m, s]) => {
+      g.setLineDash([3,4]); g.strokeStyle = COL.line; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, rr*m, 0, TAU); g.stroke(); g.setLineDash([]);
+    });
+    if (!compact){
+      const a = -1.05;
+      [[0.2,'1.5'],[1/3,'2'],[0.5,'3']].forEach(([m, s]) => {
+        const r = rr*m;
+        tag(g, 'SWR '+s, cx + r*Math.cos(-a) + 4, cy + r*Math.sin(-a) + 4, COL.muted, '11px '+SANS, 'left');
+      });
+    }
+    text(g, '단락', cx - rr - 8, cy - 6, COL.muted, '12px '+SANS, 'right');
+    text(g, '−1', cx - rr - 8, cy + 16, COL.muted, '12px '+SANS, 'right');
+    text(g, '개방', cx + rr + 8, cy - 6, COL.muted, '12px '+SANS, 'left');
+    text(g, '+1', cx + rr + 8, cy + 16, COL.muted, '12px '+SANS, 'left');
+    text(g, '|Γ| = 1', cx + rr*0.72 + 6, cy - rr*0.72 - 6, COL.muted, '12px '+SANS, 'left');
+  }
+
+  /* ---------- animation manager ---------- */
+  let run = !reduce, lastT = null, rafId = null;
+  const anims = [];
+  const pauseBtns = [];
+  function setBtns(){ const t = run ? '<span class="ic" aria-hidden="true">❚❚</span>멈춤' : '<span class="ic" aria-hidden="true">▶</span>재생'; pauseBtns.forEach(b => b.innerHTML = t); }
+  const animating = () => run && !document.hidden && anims.some(a => a.vis);
+  function startLoop(){ if (!rafId && animating()){ lastT = null; rafId = requestAnimationFrame(loop); } }
+  function stopLoop(){ if (rafId){ cancelAnimationFrame(rafId); rafId = null; } lastT = null; }
+  function loop(now){
+    rafId = null;
+    if (!animating()){ lastT = null; return; }
+    const dt = lastT === null ? 0 : Math.min(0.05, (now-lastT)/1000);
+    lastT = now;
+    anims.forEach(a => { if (a.vis){ a.step(dt); a.draw(); } });
+    rafId = requestAnimationFrame(loop);
+  }
+  function addAnim(cv, step, draw, btn){
+    const a = {cv, step, draw, vis:true}; anims.push(a);
+    if (btn){ pauseBtns.push(btn); btn.addEventListener('click', () => { run = !run; setBtns(); if (run) startLoop(); else stopLoop(); }); }
+    return a;
+  }
+  const redrawIfIdle = a => { if (!animating() || !a.vis) a.draw(); };
+
+  /* ---------- A: V and I with phase angle ---------- */
+  const cvA = document.getElementById('cvA'), rA = document.getElementById('rA'), xA = document.getElementById('xA'), readA = document.getElementById('readA');
+  let phA = 0.4;
+  function drawA(){
+    const h = 250;
+    const {g, w} = fit(cvA, h);
+    const R = +rA.value, X = +xA.value;
+    const mag = Math.hypot(R, X), ph = (R === 0 && X === 0) ? 0 : Math.atan2(X, R);
+    const Rr = 70, cx = 24 + Rr + 10, cy = h/2 + 6;
+    g.strokeStyle = COL.line; g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, cy, Rr, 0, TAU); g.stroke();
+    g.beginPath(); g.moveTo(cx-Rr-14, cy); g.lineTo(w-12, cy); g.moveTo(cx, cy-Rr-14); g.lineTo(cx, cy+Rr+14); g.stroke();
+    const li = Rr*0.55, lv = Rr*Math.max(0.12, Math.min(1, mag/141.5));
+    const ai = phA, av = phA + ph;
+    if (Math.abs(ph) > 0.02){
+      g.strokeStyle = COL.pi; g.globalAlpha = 0.5; g.lineWidth = 2;
+      g.beginPath(); g.arc(cx, cy, Rr*0.3, -ai, -av, ph > 0); g.stroke(); g.globalAlpha = 1;
+      const am = (ai+av)/2;
+      text(g, 'φ', cx + Rr*0.42*Math.cos(am), cy - Rr*0.42*Math.sin(am) + 5, COL.pi, 'italic 600 15px '+MATHF, 'center');
+    }
+    arrow(g, cx, cy, cx + li*Math.cos(ai), cy - li*Math.sin(ai), COL.fg, 3);
+    arrow(g, cx, cy, cx + lv*Math.cos(av), cy - lv*Math.sin(av), COL.pi, 3);
+    text(g, '전류 I', 14, 20, COL.fg, '600 13px '+SANS);
+    text(g, '전압 V', 70, 20, COL.pi, '600 13px '+SANS);
+    const xs = cx + Rr + 34;
+    if (w - xs > 100){
+      const lam = 180;
+      const wave = (amp, off, col) => { g.strokeStyle = col; g.lineWidth = 2.2; g.beginPath(); for (let x = xs; x <= w-14; x += 2){ const y = cy - amp*Math.sin(phA + off - TAU*(x-xs)/lam); x===xs?g.moveTo(x,y):g.lineTo(x,y); } g.stroke(); };
+      wave(li, 0, COL.fg);
+      wave(lv, ph, COL.pi);
+      text(g, '세로 투영 → 시간 파형', xs, 20, COL.muted, '13px '+SANS);
+    }
+    const kind = Math.abs(X) < 0.5 ? '공진 (동위상)' : X > 0 ? '유도성: 전압이 앞섬' : '용량성: 전압이 뒤짐';
+    tag(g, kind, w-14, h-12, Math.abs(X) < 0.5 ? COL.r : X > 0 ? COL.l : COL.c, '600 13px '+SANS, 'right');
+    readA.textContent = 'Z = ' + R + ' ' + sgn(X) + ' j' + Math.abs(X) + ' Ω · |Z| = ' + fmt(mag,1) + ' Ω · φ = ' + fmt(ph*180/Math.PI,1) + '°';
+  }
+  const aniA = addAnim(cvA, dt => { phA = (phA + 0.9*dt) % TAU; }, drawA, document.getElementById('pauseA'));
+  [rA, xA].forEach(el => el.addEventListener('input', () => redrawIfIdle(aniA)));
+
+  /* ---------- B: Γ plane ---------- */
+  const cvB = document.getElementById('cvB'), rB = document.getElementById('rB'), xB = document.getElementById('xB'), readB = document.getElementById('readB');
+  let openB = false;
+  function drawB(){
+    const h = 320;
+    const {g, w} = fit(cvB, h);
+    const rr = Math.min(h/2 - 28, w/2 - 60), cx = w/2, cy = h/2;
+    drawPlane(g, cx, cy, rr, false);
+    const R = +rB.value, X = +xB.value;
+    const G = gammaOf(R, X, openB), m = magOf(G);
+    const tx = cx + rr*G.re, ty = cy - rr*G.im;
+    if (m > 0.004) arrow(g, cx, cy, tx, ty, COL.w, 3.5);
+    g.fillStyle = COL.w; g.beginPath(); g.arc(tx, ty, 5, 0, TAU); g.fill();
+    const nearPole = Math.abs(G.im) < 0.18 && Math.abs(G.re) > 0.72;
+    if (nearPole) tag(g, 'Γ', tx + (G.re > 0 ? -14 : 14), ty - 12, COL.w, 'italic 600 18px '+MATHF, G.re > 0 ? 'right' : 'left');
+    else tag(g, 'Γ', tx + (G.re >= 0 ? 10 : -10), ty - 8, COL.w, 'italic 600 18px '+MATHF, G.re >= 0 ? 'left' : 'right');
+    const s = swrOf(m), ang = m < 1e-6 ? 0 : Math.atan2(G.im, G.re)*180/Math.PI;
+    const zt = openB ? '∞ (개방)' : R + ' ' + sgn(X) + ' j' + Math.abs(X) + ' Ω';
+    setLines(readB, ['안테나 Z_L: ' + zt, 'Γ = ' + fmt(m,3) + ' ∠ ' + fmt(ang,1) + '° · SWR ' + swrTxt(s) + ' · 반사 전력 ' + fmt(m*m*100,1) + ' %']);
+  }
+  [rB, xB].forEach(el => el.addEventListener('input', () => { openB = false; drawB(); }));
+  document.querySelectorAll('#s3 .presets button').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.open){ openB = true; }
+    else { openB = false; rB.value = b.dataset.r; xB.value = b.dataset.x; }
+    drawB();
+  }));
+
+  /* ---------- C: standing wave ---------- */
+  const cvC = document.getElementById('cvC'), gC = document.getElementById('gC'), tC = document.getElementById('tC'), dC = document.getElementById('dC'), readC = document.getElementById('readC');
+  let wt = 0;
+  function drawC(){
+    const h = 330;
+    const {g, w} = fit(cvC, h);
+    const m = gC.value/100, th = tC.value*Math.PI/180;
+    const Gr = m*Math.cos(th), Gi = m*Math.sin(th);
+    const x0 = 40, x1 = w - 26, L = x1 - x0;
+    const cy = 112, A = 44;
+    const dOf = x => (x1 - x)/L;
+    g.strokeStyle = COL.line; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x0, cy); g.lineTo(x1, cy); g.stroke();
+    for (let k = 0; k <= 4; k++){
+      const x = x1 - L*k/4;
+      g.beginPath(); g.moveTo(x, cy + 2*A + 6); g.lineTo(x, cy + 2*A + 12); g.stroke();
+      text(g, ['0','λ/4','λ/2','3λ/4','λ'][k], x, cy + 2*A + 26, COL.muted, 'italic 13px '+MATHF, 'center');
+    }
+    text(g, '안테나 (d = 0)', x1, 18, COL.muted, '12px '+SANS, 'right');
+    text(g, '← 송신기 쪽', x0, 18, COL.muted, '12px '+SANS, 'left');
+    g.fillStyle = COL.pi; g.fillRect(x1 + 4, cy - 14, 8, 28);
+    const env = d => { const a = -2*TAU*d; const re = 1 + Gr*Math.cos(a) - Gi*Math.sin(a), im = Gr*Math.sin(a) + Gi*Math.cos(a); return Math.hypot(re, im); };
+    const fwd = d => Math.cos(wt + TAU*d);
+    const ref = d => m*Math.cos(wt - TAU*d + th);
+    const curve = (fn, col, lw, alpha, dash) => { g.globalAlpha = alpha; g.strokeStyle = col; g.lineWidth = lw; if (dash) g.setLineDash(dash); g.beginPath(); for (let x = x0; x <= x1; x += 2){ const y = cy - A*fn(dOf(x)); x===x0?g.moveTo(x,y):g.lineTo(x,y); } g.stroke(); g.setLineDash([]); g.globalAlpha = 1; };
+    curve(fwd, COL.f, 1.6, 0.55);
+    curve(ref, COL.w, 1.6, 0.55);
+    curve(d => fwd(d) + ref(d), COL.fg, 2.6, 1);
+    curve(env, COL.fg, 1.2, 0.8, [4,4]);
+    curve(d => -env(d), COL.fg, 1.2, 0.8, [4,4]);
+    const dp = dC.value/100, xp = x1 - L*dp;
+    g.strokeStyle = COL.pi; g.lineWidth = 1.5; g.beginPath(); g.moveTo(xp, cy - 2*A - 4); g.lineTo(xp, cy + 2*A + 4); g.stroke();
+    tag(g, 'd = ' + fmt(dp,2) + ' λ', xp, cy - 2*A - 8, COL.pi, '600 12px '+SANS, xp > x1 - 60 ? 'right' : 'center');
+    // phasor inset
+    const pcx = 54, pcy = 268, u = 30;
+    const a = -2*TAU*dp, Rre = Gr*Math.cos(a) - Gi*Math.sin(a), Rim = Gr*Math.sin(a) + Gi*Math.cos(a);
+    g.strokeStyle = COL.line; g.lineWidth = 1; g.setLineDash([2,4]); g.beginPath(); g.arc(pcx + u, pcy, u*m, 0, TAU); g.stroke(); g.setLineDash([]);
+    arrow(g, pcx, pcy, pcx + u, pcy, COL.f, 3);
+    arrow(g, pcx + u, pcy, pcx + u + u*Rre, pcy - u*Rim, COL.w, 3);
+    arrow(g, pcx, pcy, pcx + u + u*Rre, pcy - u*Rim, COL.fg, 2);
+    const vd = env(dp);
+    text(g, '측정 위치의 화살표 합', pcx + 2*u + 30, pcy - 30, COL.muted, '12px '+SANS);
+    text(g, '노랑 1 (진행파)', pcx + 2*u + 30, pcy - 10, COL.f, '600 12.5px '+SANS);
+    text(g, '청록 Γ·e^(−j2βd) (반사파)', pcx + 2*u + 30, pcy + 8, COL.w, '600 12.5px '+SANS);
+    text(g, '흰색 합 |V(d)| = ' + fmt(vd,3), pcx + 2*u + 30, pcy + 26, COL.fg, '600 12.5px '+SANS);
+    const s = swrOf(m);
+    readC.textContent = 'V_max = ' + fmt(1+m,3) + ' · V_min = ' + fmt(1-m,3) + ' · SWR = ' + swrTxt(s) + ' · d = ' + fmt(dp,2) + ' λ에서 |V| = ' + fmt(vd,3);
+  }
+  const aniC = addAnim(cvC, dt => { wt = (wt + 1.4*dt) % TAU; }, drawC, document.getElementById('pauseC'));
+  [gC, tC, dC].forEach(el => el.addEventListener('input', () => redrawIfIdle(aniC)));
+
+  /* ---------- K: SWR calculator ---------- */
+  const sK = document.getElementById('sK'), calcK = document.getElementById('calcK');
+  function drawK(){
+    const s = parseFloat(sK.value);
+    calcK.textContent = '';
+    const rows = [];
+    if (!(s >= 1)) rows.push(['입력', 'SWR은 1 이상의 값을 넣어 주십시오.']);
+    else {
+      const m = (s-1)/(s+1);
+      rows.push(['|Γ| = (SWR−1)/(SWR+1)', fmt(m,3)]);
+      rows.push(['반사 전력 |Γ|²', fmt(m*m*100,2) + ' %', true]);
+      rows.push(['전달 전력 1 − |Γ|²', fmt((1-m*m)*100,2) + ' %']);
+      rows.push(['반사 손실 RL', m === 0 ? '∞' : fmt(-20*Math.log10(m),2) + ' dB']);
+    }
+    rows.forEach(r => { const d = document.createElement('div'); if (r[2]) d.className = 'end'; const a = document.createElement('span'); a.textContent = r[0]; const b = document.createElement('span'); b.textContent = r[1]; d.appendChild(a); d.appendChild(b); calcK.appendChild(d); });
+  }
+  sK.addEventListener('input', drawK);
+
+  /* ---------- D: tuner ---------- */
+  const cvD = document.getElementById('cvD'), rD = document.getElementById('rD'), xD = document.getElementById('xD'), sD = document.getElementById('sD'), kD = document.getElementById('kD'), readD = document.getElementById('readD');
+  const kOf = v => Math.pow(5, v/100);
+  function drawD(){
+    const h = 300;
+    const {g, w} = fit(cvD, h);
+    const R = +rD.value, X = +xD.value, Xs = +sD.value, k = kOf(+kD.value);
+    const rr = Math.min(h/2 - 26, w/2 - 60), cx = w/2, cy = h/2;
+    drawPlane(g, cx, cy, rr, w < 460);
+    const Rin = k*R, Xin = k*(X + Xs);
+    const G1 = gammaOf(R, X, false), G2 = gammaOf(Rin, Xin, false);
+    const p1 = [cx + rr*G1.re, cy - rr*G1.im], p2 = [cx + rr*G2.re, cy - rr*G2.im];
+    if (Math.hypot(p2[0]-p1[0], p2[1]-p1[1]) > 8){
+      g.setLineDash([4,4]); arrow(g, p1[0], p1[1], p2[0], p2[1], COL.muted, 1.5); g.setLineDash([]);
+    }
+    g.globalAlpha = 0.45; g.fillStyle = COL.w; g.beginPath(); g.arc(p1[0], p1[1], 6, 0, TAU); g.fill(); g.globalAlpha = 1;
+    const same = Math.hypot(p2[0]-p1[0], p2[1]-p1[1]) < 14;
+    const L1 = G1.re > 0.3 || (G1.re < 0 && G1.re > -0.65 && p1[0] <= p2[0]);
+    const L2 = G2.re > 0.3;
+    g.fillStyle = COL.w; g.beginPath(); g.arc(p2[0], p2[1], 6.5, 0, TAU); g.fill();
+    if (same){
+      tag(g, '안테나 = 튜너 거친 뒤', L2 ? p2[0] - 12 : p2[0] + 12, p2[1] - 10, COL.w, '600 12px '+SANS, L2 ? 'right' : 'left');
+    } else {
+      tag(g, '안테나', L1 ? p1[0] - 10 : p1[0] + 10, p1[1] - 10, COL.soft, '600 12px '+SANS, L1 ? 'right' : 'left');
+      tag(g, '튜너 거친 뒤', L2 ? p2[0] - 10 : p2[0] + 10, p2[1] + 22, COL.w, '600 12px '+SANS, L2 ? 'right' : 'left');
+    }
+    const s1 = swrOf(magOf(G1)), s2 = swrOf(magOf(G2));
+    setLines(readD, [
+      '안테나: ' + R + ' ' + sgn(X) + ' j' + Math.abs(X) + ' Ω · SWR ' + swrTxt(s1),
+      '튜너 거친 뒤: ' + fmt(Rin,1) + ' ' + sgn(Xin) + ' j' + fmt(Math.abs(Xin),1) + ' Ω · SWR ' + swrTxt(s2),
+      '튜너 설정: 보정 리액턴스 ' + sgn(Xs) + ' j' + Math.abs(Xs) + ' Ω · 저항 변환 ×' + fmt(k,2)
+    ]);
+  }
+  [rD, xD, sD, kD].forEach(el => el.addEventListener('input', drawD));
+  document.getElementById('autoD').addEventListener('click', () => {
+    const X = +xD.value, R = +rD.value;
+    sD.value = Math.max(-150, Math.min(150, -X));
+    kD.value = Math.max(-100, Math.min(100, Math.round(100*Math.log(Z0/R)/Math.log(5))));
+    drawD();
+  });
+  document.getElementById('resetD').addEventListener('click', () => { sD.value = 0; kD.value = 0; drawD(); });
+  document.querySelectorAll('#s6 .presets button').forEach(b => b.addEventListener('click', () => { rD.value = b.dataset.r; xD.value = b.dataset.x; sD.value = 0; kD.value = 0; drawD(); }));
+
+  /* ---------- visibility ---------- */
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver(es => {
+      es.forEach(e => { const a = anims.find(x => x.cv === e.target); if (a) a.vis = e.isIntersecting; });
+      if (animating()) startLoop(); else stopLoop();
+    }, {threshold: 0.05});
+    anims.forEach(a => io.observe(a.cv));
+  }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopLoop(); else startLoop(); });
+
+  function drawAll(){ drawA(); drawB(); drawC(); drawK(); drawD(); }
+  let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawAll, 120); });
+  setBtns();
+  drawAll();
+  startLoop();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll);
+})();
+</script>
+<script>
+window.NARR = [
+["hero","h1",0,"무선 공식, 수학으로 보기. 2편, 에스더블유알은 무엇을 재는 걸까."],
+["hero",".big",0,"맨 위의 식은 두 개입니다. 에스더블유알은, 1 더하기 감마의 크기, 나누기 1 빼기 감마의 크기. 그리고 반사계수 감마는, 제트 엘 빼기 제트 제로, 나누기 제트 엘 더하기 제트 제로. 송신기와 안테나 사이에서 가장 자주 확인하는 숫자가 에스더블유알입니다."],
+["hero",".qs",0,"1편에서 공진을 회전 벡터로 설명했다면, 이번에는 같은 방법으로 반사와 정재파를 설명합니다. 질문은 세 가지입니다. 왜 50옴에 맞추면 반사가 없을까요? 정재파는 왜 생기고, 에스더블유알은 무엇과 무엇의 비일까요? 그리고 안테나가 공진하면 에스더블유알은 항상 1일까요?"],
+["hero",".lede",1,"출발점은 1편의 마지막에 나온 비스듬한 화살표, 임피던스 제트입니다."],
+
+["s1","h2",0,"1장. 임피던스는 크기와 각도를 가진 화살표입니다. 질문은, 공진에서 벗어나면 전압과 전류는 어떻게 되는가입니다."],
+["s1",".plates",0,"기호 두 개입니다. 제트는 임피던스, 저항과 리액턴스를 합한 복소수입니다. 그리고 소문자 파이는 위상각입니다. 원주율 파이와 이름은 같지만 다른 글자입니다."],
+["s1",".prose",0,"1편에서 직렬 회로의 임피던스는 알 더하기 제이 엑스였습니다. 공진하면 엑스가 0이라 실수축 위에 놓이지만, 공진에서 벗어나면 기울어진 화살표가 됩니다. 이 화살표는 길이와 각도로도 적을 수 있습니다. 제트는, 제트의 크기 곱하기 e의 제이 위상각 파이 승. 크기는 루트 알 제곱 더하기 엑스 제곱이고, 위상각 파이는 엑스 나누기 알의 아크탄젠트입니다. 전압은 제트 곱하기 전류인데, 지수끼리 곱하면 각도가 더해지므로, 전압 화살표는 전류 화살표보다 제트의 크기만큼 길고, 위상각 파이만큼 앞서 회전합니다."],
+["s1",".stage",0,"그림에서 흰색이 전류, 분홍이 전압입니다. 엑스를 양수로 하면 전압이 전류보다 앞서 돌고, 음수로 하면 뒤따릅니다. 엑스가 0이면 두 화살표의 방향이 같아지고, 오른쪽 파형의 마루도 겹칩니다."],
+["s1",".prose",1,"전력을 실제로 소비하는 것은 저항 성분뿐입니다. 리액턴스 성분은 한 주기 동안 에너지를 저장했다가 그대로 돌려줍니다."],
+["s1",".answer",0,"1장의 결론입니다. 임피던스는 전압 화살표가 전류 화살표보다 몇 배 길고, 몇 도 앞서는지를 함께 나타냅니다."],
+
+["s2","h2",0,"2장. 급전선에는 고유한 임피던스가 있습니다. 질문은, 동축 케이블에 적힌 50옴은 무엇의 50옴인가입니다."],
+["s2",".plates",0,"기호는 제트 제로, 특성 임피던스입니다. 급전선의 단면 구조로 정해지는 값입니다."],
+["s2",".prose",0,"급전선은 아주 짧은 코일과 콘덴서가 끝없이 이어진 구조로 볼 수 있습니다. 두 도체를 따라 흐르는 전류는 자기장을 만들고, 두 도체 사이에는 전기장이 생기기 때문입니다. 1미터당 인덕턴스를 엘 프라임, 1미터당 정전용량을 씨 프라임이라고 합니다."],
+["s2",".stage",0,"그림은 이 구조를 코일과 콘덴서가 반복되는 사다리 모양으로 그린 것입니다."],
+["s2",".prose",1,"이 구조 위를 한 방향으로 진행하는 파는 어느 지점에서나 전압과 전류의 비가 같습니다. 손실을 무시하면 그 비는 루트, 엘 프라임 나누기 씨 프라임입니다. 1편의 공진 공식에는 루트 엘씨, 곱이 있었다면, 여기에는 비의 제곱근이 있습니다. 예를 들어 1미터당 250 나노헨리, 100 피코패럿인 케이블은 루트 2500, 50옴이 됩니다. 기억할 것이 셋 있습니다. 제트 제로는 실수라서 진행파의 전압과 전류는 동위상입니다. 엘 프라임과 씨 프라임의 비로 정해지므로 케이블 길이와 무관합니다. 그리고 저항계로 양 끝을 재서 나오는 값이 아닙니다."],
+["s2",".answer",0,"2장의 결론입니다. 제트 제로는 급전선 위를 진행하는 파가 요구하는 전압과 전류의 비입니다."],
+
+["s3","h2",0,"3장. 두 조건이 부딪히는 곳에서 반사가 생깁니다. 질문은, 급전선 끝의 안테나가 50옴이 아니면 어떻게 되는가입니다."],
+["s3",".plates",0,"기호 둘입니다. 제트 엘은 부하 임피던스, 급전선 끝에 달린 안테나의 임피던스입니다. 감마는 반사계수로, 그리스 문자 감마의 대문자이고, 크기는 0에서 1 사이입니다."],
+["s3",".prose",0,"급전선은 전압과 전류의 비로 제트 제로를 요구하는데, 끝에 달린 안테나는 자기 임피던스 제트 엘을 요구합니다. 둘이 다르면 두 조건을 동시에 만족시키려고 파의 일부가 되돌아갑니다. 안테나로 가는 진행파를 브이 플러스, 되돌아오는 반사파를 브이 마이너스라고 하면, 급전선 끝에서 전압은 둘의 합이고, 전류는 둘의 차를 제트 제로로 나눈 값입니다. 반사파는 반대 방향으로 흐르기 때문입니다. 끝에서 전압 나누기 전류는 제트 엘이어야 하므로, 반사파와 진행파의 비를 감마로 두고 정리하면, 감마는 제트 엘 빼기 제트 제로, 나누기 제트 엘 더하기 제트 제로가 됩니다. 감마도 화살표입니다. 길이는 반사의 크기, 각도는 반사될 때 위상이 바뀐 정도입니다."],
+["s3",".table-wrap",0,"몇 가지 경우를 넣어 봅니다. 안테나가 50옴이면 감마는 0, 반사가 없습니다. 단락이면 마이너스 1, 개방이면 플러스 1로, 전부 반사됩니다. 25옴이면 마이너스 3분의 1, 100옴이면 플러스 3분의 1입니다."],
+["s3",".prose",1,"단락의 마이너스 1은 1편에서 본 e의 제이 파이 승, 곧 180도 회전, 반 바퀴입니다. 반사파가 진행파와 정반대 방향의 화살표로 되돌아온다는 뜻입니다."],
+["s3",".stage",0,"그림은 감마를 원 안의 화살표로 보여 줍니다. 바깥 원은 전부 반사, 중심은 반사 없음입니다. 부하 예 버튼을 눌러 보면, 50옴에서 화살표가 사라지고, 단락은 왼쪽 끝, 개방은 오른쪽 끝으로 갑니다. 점선 원들은 에스더블유알 1.5, 2, 3인 자리입니다."],
+["s3",".answer",0,"3장의 결론이자 첫 질문의 답입니다. 감마가 0이 되는 조건은 제트 엘이 제트 제로와 같을 때 하나뿐입니다. 그래서 50옴 급전선에는 50옴 부하를 맞춥니다."],
+
+["s4","h2",0,"4장. 정재파. 제목은, 두 화살표가 겹치는 각도가 위치마다 다르다는 것입니다. 질문은, 진행파와 반사파가 함께 있으면 급전선 위에서 무엇이 보이는가입니다."],
+["s4",".plates",0,"기호는 베타, 위상 상수입니다. 급전선을 1미터 따라갈 때 회전 벡터가 회전하는 각도이고, 2파이 나누기 람다입니다."],
+["s4",".prose",0,"급전선 위 한 지점의 전압은 진행파와 반사파, 두 회전 벡터의 합입니다. 안테나에서 거리 디만큼 떨어진 곳을 보면, 진행파는 안테나까지 디만큼 덜 왔고, 반사파는 안테나에서 디만큼 더 갔습니다. 그래서 두 화살표 사이의 각도는 왕복 거리 2디만큼, 즉 2베타디만큼 달라집니다. 식으로 쓰면, 길이 1인 화살표에 길이가 감마인 화살표가 이어 붙어 있고, 뒤쪽 화살표가 위치에 따라 회전하는 모양입니다. 두 화살표가 같은 방향이면 합이 최대, 1 더하기 감마의 크기, 반대 방향이면 최소, 1 빼기 감마의 크기입니다. 이 최대와 최소는 4분의 1 파장마다 번갈아 나타납니다."],
+["s4",".stage",0,"그림에서 노랑은 안테나로 가는 진행파, 청록은 되돌아오는 반사파, 흰색은 둘의 합입니다. 노랑과 청록은 서로 반대로 움직이지만, 흰 합성파는 제자리에서 출렁이고, 흰 점선 포락선은 위치마다 높이가 다릅니다. 측정 위치를 옮기면 왼쪽 아래 그림에서 청록 화살표가 돌며 합의 길이가 커졌다 작아졌다 합니다. 감마의 크기를 0으로 하면 포락선이 평평해집니다."],
+["s4",".answer",0,"4장의 결론입니다. 정재파의 최대는 1 더하기 감마의 크기, 최소는 1 빼기 감마의 크기이며, 4분의 1 파장 간격으로 번갈아 나타납니다."],
+
+["s5","h2",0,"5장. 에스더블유알은 정재파의 최대와 최소의 비입니다. 질문은, 에스더블유알 1.5와 2.0은 실제로 얼마나 다른가입니다."],
+["s5",".plates",0,"기호 둘입니다. 에스더블유알은 정재파비로, 전압으로 정의하므로 브이에스더블유알이라고도 합니다. 알엘은 리턴 로스, 반사 손실로, 반사파가 진행파보다 몇 데시벨 작은지를 나타냅니다."],
+["s5",".prose",0,"4장의 최대를 최소로 나누면 에스더블유알입니다. 1 더하기 감마의 크기, 나누기 1 빼기 감마의 크기. 감마의 크기는 0에서 1 사이이므로 에스더블유알은 1에서 무한대 사이입니다. 최대를 최소로 나눈 값이라 1보다 작아질 수 없습니다. 그리고 전력은 전압의 제곱에 비례하므로, 반사되는 전력의 비율은 감마 크기의 제곱입니다."],
+["s5",".table-wrap",0,"표로 보면, 에스더블유알 1.2는 반사 전력 0.8퍼센트, 1.5는 4퍼센트, 2.0은 11.1퍼센트, 3.0은 25퍼센트입니다. 1.5에서 2.0으로 나빠지면 반사 전력이 약 세 배가 됩니다."],
+["s5",".stage",0,"아래 계산기에 측정한 에스더블유알을 넣으면 반사계수, 반사 전력, 전달 전력, 반사 손실이 바로 계산됩니다."],
+["s5",".prose",1,"다만 반사 전력이 곧 잃어버리는 전력은 아닙니다. 송신기 쪽에 튜너가 있으면 되돌아온 파는 튜너에서 다시 안테나 쪽으로 반사되어 결국 대부분 방사됩니다. 실제 손실은 급전선을 여러 번 오가며 생기는 추가 감쇠이고, 급전선이 길고 손실이 클수록 커집니다. 그래도 송신기가 높은 에스더블유알을 직접 보면 보호 회로가 출력을 줄이는 경우가 많습니다."],
+["s5",".answer",0,"5장의 결론이자 두 번째 질문의 답입니다. 에스더블유알은 반사계수의 크기를 정재파의 최대와 최소의 비로 나타낸 값이며, 정의상 1 이상입니다."],
+
+["s6","h2",0,"6장. 공진은 정합의 절반입니다. 질문은, 안테나가 공진하면 에스더블유알은 항상 1인가입니다."],
+["s6",".prose",0,"1편에서 공진은 리액턴스가 상쇄되어 엑스가 0인 상태였습니다. 공진한 안테나의 임피던스는 실수 알입니다. 그런데 감마가 0이 되려면 엑스가 0인 것에 더해 알이 제트 제로와 같아야 합니다. 예를 들어 완전한 접지 위의 4분의 1 파장 버티컬은 공진할 때 약 36옴이라, 50옴 급전선에서 에스더블유알은 약 1.4입니다. 공진했지만 1은 아닙니다. 실제 설치에서는 지면 손실과 라디얼 수에 따라 급전점 저항이 높아져, 오히려 50옴에 가까워지기도 합니다. 그래서 안테나 튜너는 두 가지 일을 합니다. 남은 리액턴스를 반대 부호로 상쇄하고, 저항을 50옴으로 바꿉니다."],
+["s6",".stage",0,"그림에서 흐린 점은 안테나 단독, 밝은 점은 튜너를 거친 뒤입니다. 1번 리액턴스 보정으로 엑스를 0으로 만들면 점이 가로축 위로 오고, 2번 저항 변환으로 50옴에 맞추면 중심에 도착합니다. 튜너 맞추기 버튼을 누르면 두 단계가 한 번에 맞춰집니다. 여기서 2번은 이상적인 변압기로 가정한 것이라, 실제 튜너가 조정되는 경로와는 다릅니다."],
+["s6",".answer",0,"6장의 결론이자 세 번째 질문의 답입니다. 공진은 엑스가 0인 것, 정합은 제트가 제트 제로와 같은 것입니다. 공진하더라도 저항이 제트 제로와 다르면 에스더블유알은 1이 아닙니다."],
+
+["s7","h2",0,"마무리입니다. 두 편을 한 줄로 정리해 봅니다."],
+["s7",".table-wrap",0,"1편의 공진에서는 플러스 제이와 마이너스 제이 리액턴스가 서로 지워졌고, 그 조건에서 에프 제로는 1 나누기 2파이 루트 엘씨가 나왔습니다. 2편의 정합에서는 반사파가 사라지고, 그 조건은 제트 엘이 제트 제로와 같은 것이었습니다."],
+["s7",".prose",0,"두 편 모두 같은 도구 하나를 썼습니다. 회전하는 화살표, 자연상수 e의 제이 세타 승입니다. 화살표를 더하고, 돌리고, 지우는 것만으로 공진과 정합을 모두 설명할 수 있었습니다."],
+["s7",".next",0,"무선 공식, 수학으로 보기는 이것으로 마칩니다. 들어 주셔서 감사합니다."]
+];
+</script>
+<script>
+(function(){
+  const S = window.speechSynthesis;
+  const DATA = window.NARR || [];
+  if (!S || !window.SpeechSynthesisUtterance || !DATA.length) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- resolve narration items to page elements ---------- */
+  function resolve(sec, sel, idx){
+    let root = sec === 'hero' ? document.querySelector('.hero') : document.getElementById(sec);
+    if (sel.indexOf('doc:') === 0) return document.querySelectorAll(sel.slice(4))[idx] || root;
+    if (!root) return null;
+    if (!sel) return root;
+    return root.querySelectorAll(sel)[idx] || root;
+  }
+  const items = DATA.map(([sec, sel, idx, text]) => ({sec, el: resolve(sec, sel, idx), text}));
+  function splitSentences(t){
+    return t.replace(/([.?!])\s+/g, '$1\u0001').split('\u0001').map(x => x.trim()).filter(Boolean);
+  }
+  items.forEach(it => it.parts = splitSentences(it.text));
+  function secLabel(sec){
+    if (sec === 'hero') return '머리말';
+    const el = document.getElementById(sec);
+    const tag = el && el.querySelector('.tag');
+    return tag ? tag.textContent.trim() : sec;
+  }
+
+  /* ---------- voice ---------- */
+  let voice = null;
+  function pickVoice(){
+    const vs = S.getVoices().filter(v => /^ko(-|_|$)/i.test(v.lang));
+    if (!vs.length){ voice = null; return; }
+    const score = v => (/natural|neural|online/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 2 : 0) + (/yuna|sunhi|heami|injoon|hyunsu|jimin/i.test(v.name) ? 1 : 0);
+    voice = vs.slice().sort((a, b) => score(b) - score(a))[0];
+  }
+  pickVoice();
+  if (typeof S.addEventListener === 'function') S.addEventListener('voiceschanged', pickVoice);
+  else S.onvoiceschanged = pickVoice;
+  try { S.cancel(); } catch(e){}
+
+  /* ---------- UI ---------- */
+  const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const heroBox = mk('div', 'listen');
+  const allBtn = mk('button', 'narr-all', '<span class="ic" aria-hidden="true">▶</span>처음부터 듣기');
+  allBtn.type = 'button';
+  const note = mk('span', 'narr-note', '기기 음성으로 읽고, 읽는 곳으로 화면이 따라갑니다.');
+  heroBox.appendChild(allBtn); heroBox.appendChild(note);
+  const hero = document.querySelector('.hero');
+  const heroTitle = hero && hero.querySelector('h1');
+  if (heroTitle) heroTitle.insertAdjacentElement('afterend', heroBox);
+  else if (hero) hero.appendChild(heroBox);
+
+  const secs = [];
+  items.forEach((it, i) => { if (it.sec !== 'hero' && secs.indexOf(it.sec) < 0) secs.push(it.sec); });
+  secs.forEach(sec => {
+    const el = document.getElementById(sec);
+    const h2 = el && el.querySelector('h2');
+    if (!h2) return;
+    const b = mk('button', 'narr-sec', '<span class="ic" aria-hidden="true">▶</span>이 장 듣기');
+    b.type = 'button';
+    b.addEventListener('click', () => start(items.findIndex(x => x.sec === sec), sec));
+    h2.insertAdjacentElement('afterend', b);
+  });
+
+  const bar = mk('div', 'narr-bar');
+  bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', '낭독 재생');
+  bar.hidden = true;
+  bar.innerHTML =
+    '<div class="nb-info"><span class="nb-sec"></span><span class="nb-pos"></span></div>' +
+    '<div class="nb-ctrl">' +
+      '<button type="button" class="alt nb-prev" aria-label="이전 문단">⏮</button>' +
+      '<button type="button" class="nb-play" aria-label="일시정지">❚❚</button>' +
+      '<button type="button" class="alt nb-next" aria-label="다음 문단">⏭</button>' +
+      '<label class="nb-rate">속도 <select id="narrRate"><option value="0.8">0.8×</option><option value="0.9">0.9×</option><option value="1" selected>1.0×</option><option value="1.1">1.1×</option><option value="1.2">1.2×</option></select></label>' +
+      '<button type="button" class="alt nb-close" aria-label="낭독 닫기">✕</button>' +
+    '</div>' +
+    '<div class="nb-msg" hidden></div>';
+  document.body.appendChild(bar);
+  const $ = s => bar.querySelector(s);
+  const secEl = $('.nb-sec'), posEl = $('.nb-pos'), playBtn = $('.nb-play'), rateSel = $('#narrRate'), msgEl = $('.nb-msg');
+
+  /* ---------- engine ---------- */
+  let i = 0, k = 0, gen = 0, playing = false, onlySec = null, active = null;
+  function setActive(el){
+    if (active) active.classList.remove('narr-on');
+    active = el;
+    if (el){
+      el.classList.add('narr-on');
+      el.scrollIntoView({block: 'center', behavior: reduce ? 'auto' : 'smooth'});
+    }
+  }
+  function updateBar(){
+    const it = items[i];
+    secEl.textContent = secLabel(it.sec);
+    const same = items.filter(x => x.sec === it.sec);
+    posEl.textContent = (same.indexOf(it) + 1) + ' / ' + same.length;
+    playBtn.textContent = playing ? '❚❚' : '▶';
+    playBtn.setAttribute('aria-label', playing ? '일시정지' : '재생');
+  }
+  function showMsg(t){ msgEl.textContent = t; msgEl.hidden = !t; }
+  function speakPart(g){
+    if (g !== gen || !playing) return;
+    const it = items[i];
+    if (k >= it.parts.length){
+      const n = i + 1;
+      if (n < items.length && (!onlySec || items[n].sec === onlySec)){
+        i = n; k = 0; setActive(items[i].el); updateBar(); speakPart(g);
+      } else { finish(); }
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(it.parts[k]);
+    u.lang = 'ko-KR';
+    if (voice) u.voice = voice;
+    u.rate = +rateSel.value;
+    u.onend = () => { if (g !== gen) return; k++; speakPart(g); };
+    u.onerror = e => { if (g !== gen) return; if (e && (e.error === 'interrupted' || e.error === 'canceled')) return; k++; speakPart(g); };
+    S.speak(u);
+  }
+  function go(){ gen++; try { S.cancel(); } catch(e){} playing = true; updateBar(); speakPart(gen); }
+  function start(idx, sec){
+    if (idx < 0) return;
+    pickVoice();
+    bar.hidden = false; document.body.classList.add('narr-open');
+    if (!voice && S.getVoices().length){
+      showMsg('이 브라우저에는 한국어 음성이 없어 읽을 수 없습니다. 엣지, 크롬, 사파리에서 열어 보십시오.');
+      playing = false; i = idx; updateBar(); return;
+    }
+    showMsg('');
+    onlySec = sec || null; i = idx; k = 0;
+    setActive(items[i].el);
+    go();
+  }
+  function pause(){ playing = false; gen++; try { S.cancel(); } catch(e){} updateBar(); }
+  function finish(){ playing = false; gen++; updateBar(); setActive(null); }
+  function close(){ pause(); setActive(null); bar.hidden = true; document.body.classList.remove('narr-open'); showMsg(''); }
+  function jump(d){
+    const n = Math.max(0, Math.min(items.length - 1, i + d));
+    if (onlySec && items[n].sec !== onlySec) onlySec = items[n].sec;
+    i = n; k = 0; setActive(items[i].el); go();
+  }
+
+  allBtn.addEventListener('click', () => start(0, null));
+  playBtn.addEventListener('click', () => { if (playing) pause(); else { if (!active) { setActive(items[i].el); } go(); } });
+  $('.nb-prev').addEventListener('click', () => jump(k > 0 ? 0 : -1));
+  $('.nb-next').addEventListener('click', () => jump(1));
+  $('.nb-close').addEventListener('click', close);
+  rateSel.addEventListener('change', () => { if (playing) go(); });
+  window.addEventListener('pagehide', () => { try { S.cancel(); } catch(e){} });
+})();
+</script>
+</body>
+</html>
