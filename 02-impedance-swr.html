@@ -145,6 +145,7 @@ nav.series a[aria-current]{color:var(--bg);background:var(--fg);border-color:var
 .nb-rate select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px 6px;font:inherit}
 .nb-msg{flex-basis:100%;text-align:center;font-size:13px;color:var(--l)}
 body.narr-open{padding-bottom:120px}
+.narr-bar.emb{position:absolute;bottom:auto;top:0}
 .next{padding:20px;border:1px dashed var(--muted);border-radius:6px;display:grid;gap:8px;color:var(--soft)}
 footer{padding-block:32px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px}
 </style>
@@ -752,6 +753,32 @@ window.MathJax = {
 })();
 </script>
 <script>
+(function(){
+  if (window.self === window.top) return;
+  var last = 0, on = false;
+  function send(force){
+    if (!on) return;
+    var h = Math.ceil(document.documentElement.scrollHeight);
+    if (!force && Math.abs(h - last) < 2) return;
+    last = h;
+    try { window.parent.postMessage({type: 'antenna-types:height', height: h}, '*'); } catch(e){}
+  }
+  window.addEventListener('message', function(e){
+    var d = e.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.type === 'antenna-types:ping'){
+      if (!on){ on = true; window.__embedOn = true; document.documentElement.classList.add('embedded'); }
+      send(true);
+    } else if (d.type === 'antenna-types:viewport'){
+      window.__embedView = {top: +d.top || 0, height: +d.height || 0};
+      document.dispatchEvent(new Event('embedview'));
+    }
+  });
+  if ('ResizeObserver' in window) new ResizeObserver(function(){ send(false); }).observe(document.body);
+  window.addEventListener('load', function(){ send(true); });
+})();
+</script>
+<script>
 window.NARR = [
 ["hero","h1",0,"무선 공식, 수학으로 보기. 2편, 에스더블유알은 무엇을 재는 걸까."],
 ["hero",".big",0,"맨 위의 식은 두 개입니다. 에스더블유알은, 1 더하기 감마의 크기, 나누기 1 빼기 감마의 크기. 그리고 반사계수 감마는, 제트 엘 빼기 제트 제로, 나누기 제트 엘 더하기 제트 제로. 송신기와 안테나 사이에서 가장 자주 확인하는 숫자가 에스더블유알입니다."],
@@ -810,6 +837,7 @@ window.NARR = [
   const S = window.speechSynthesis;
   const DATA = window.NARR || [];
   if (!S || !window.SpeechSynthesisUtterance || !DATA.length) return;
+  const emb = () => !!window.__embedOn;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- resolve narration items to page elements ---------- */
@@ -883,6 +911,13 @@ window.NARR = [
     '</div>' +
     '<div class="nb-msg" hidden></div>';
   document.body.appendChild(bar);
+  function placeBar(){
+    if (!emb() || bar.hidden) return;
+    const v = window.__embedView; if (!v) return;
+    const bh = bar.offsetHeight || 64, dh = document.documentElement.scrollHeight;
+    bar.style.top = Math.max(0, Math.min(dh - bh, v.top + v.height - bh)) + 'px';
+  }
+  document.addEventListener('embedview', placeBar);
   const $ = s => bar.querySelector(s);
   const secEl = $('.nb-sec'), posEl = $('.nb-pos'), playBtn = $('.nb-play'), rateSel = $('#narrRate'), msgEl = $('.nb-msg');
 
@@ -893,7 +928,11 @@ window.NARR = [
     active = el;
     if (el){
       el.classList.add('narr-on');
-      el.scrollIntoView({block: 'center', behavior: reduce ? 'auto' : 'smooth'});
+      if (emb()){
+        const r = el.getBoundingClientRect();
+        const y = r.top + window.scrollY + Math.min(r.height / 2, 220);
+        try { window.parent.postMessage({type: 'antenna-types:scrollto', y: y, smooth: !reduce}, '*'); } catch(e){}
+      } else el.scrollIntoView({block: 'center', behavior: reduce ? 'auto' : 'smooth'});
     }
   }
   function updateBar(){
@@ -928,6 +967,8 @@ window.NARR = [
     if (idx < 0) return;
     pickVoice();
     bar.hidden = false; document.body.classList.add('narr-open');
+    bar.classList.toggle('emb', emb());
+    if (emb()){ try { window.parent.postMessage({type: 'antenna-types:needview'}, '*'); } catch(e){} placeBar(); }
     if (!voice && S.getVoices().length){
       showMsg('이 브라우저에는 한국어 음성이 없어 읽을 수 없습니다. 엣지, 크롬, 사파리에서 열어 보십시오.');
       playing = false; i = idx; updateBar(); return;
