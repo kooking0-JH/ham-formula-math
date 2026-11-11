@@ -150,6 +150,22 @@ body.narr-open{padding-bottom:120px}
 .btnlink{display:inline-flex;align-items:center;padding:8px 14px;border-radius:6px;background:var(--btn);color:var(--bg);font-weight:600;font-size:14px;text-decoration:none;box-shadow:0 2px 0 var(--btn-shadow)}
 .btnlink:hover{background:var(--btn-hover)}
 .tnote{font-size:13px;color:var(--muted);margin:8px 0 0;white-space:normal}
+table.stack thead{display:none}
+table.stack,table.stack tbody{display:block}
+table.stack tr{display:block;margin-bottom:10px;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--screen)}
+table.stack td{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:4px 0;border:0;text-align:right;white-space:normal}
+table.stack td::before{content:attr(data-label);flex:none;max-width:45%;color:var(--muted);font-size:13px;font-weight:400;text-align:left}
+table.stack td:first-child{justify-content:flex-start;font-weight:700;text-align:left}
+table.stack td:first-child::before{content:none}
+@media (max-width:560px){
+  .narr-bar{gap:4px 8px;padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px))}
+  .narr-bar .nb-info{flex-basis:100%;justify-content:center;font-size:12px;line-height:1.2}
+  .nb-ctrl{gap:6px;flex-wrap:nowrap}
+  .nb-ctrl button{min-width:36px;padding:6px 8px}
+  .nb-rate{font-size:0;gap:0}
+  .nb-rate select{font-size:13px;padding:2px 4px}
+  body.narr-open{padding-bottom:84px}
+}
 .narr-bar.emb{position:absolute;bottom:auto;top:0}
 .next{padding:20px;border:1px dashed var(--muted);border-radius:6px;display:grid;gap:8px;color:var(--soft)}
 footer{padding-block:32px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px}
@@ -215,7 +231,7 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>1편에서 직렬 RLC 회로의 임피던스는 \(Z = \cR{R} + \cJ{j}X\)였습니다. 공진하면 X = 0이 되어 Z는 실수축 위에 놓이지만, 공진에서 벗어나면 실수축에서 기울어진 화살표가 됩니다. 이 화살표는 길이와 각도로도 적을 수 있습니다.</p>
-      <div class="math">\[ \cZ{Z} = \cR{R} + \cJ{j}X = |\cZ{Z}|\,e^{\cJ{j}\cZ{\varphi}}, \qquad |\cZ{Z}| = \sqrt{\cR{R}^2 + X^2}, \qquad \cZ{\varphi} = \tan^{-1}\frac{X}{\cR{R}} \]</div>
+      <div class="math">\[ \cZ{Z} = \cR{R} + \cJ{j}X = |\cZ{Z}|\,e^{\cJ{j}\cZ{\varphi}} \]\[ |\cZ{Z}| = \sqrt{\cR{R}^2 + X^2} \]\[ \cZ{\varphi} = \tan^{-1}\frac{X}{\cR{R}} \]</div>
       <p>전압은 V = ZI입니다. 오일러 공식에서 지수끼리 곱하면 각도가 더해지므로, 전압 화살표는 전류 화살표보다 <strong>|Z|배 길고 φ만큼 앞서</strong> 회전합니다.</p>
       <div class="math">\[ V = |\cZ{Z}|\,e^{\cJ{j}\cZ{\varphi}} \cdot I_0\,e^{\cJ{j}\cW{\omega} t} = |\cZ{Z}|\,I_0\,e^{\cJ{j}(\cW{\omega} t + \cZ{\varphi})} \]</div>
     </div>
@@ -288,11 +304,11 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>급전선은 전압과 전류의 비로 Z₀를 요구하는데, 끝에 달린 안테나는 자기 임피던스 Z<sub>L</sub>을 요구합니다. 둘이 다르면 두 조건을 동시에 만족시키기 위해 파의 일부가 되돌아갑니다. 안테나 쪽으로 가는 진행파를 V⁺, 되돌아오는 반사파를 V⁻라고 하면, 급전선 끝에서 전압은 둘의 합이고 전류는 차입니다. 반사파는 반대 방향으로 흐르기 때문입니다.</p>
-      <div class="math">\[ V = V^{+} + V^{-}, \qquad I = \frac{V^{+} - V^{-}}{\cO{Z_0}} \]</div>
+      <div class="math">\[ V = V^{+} + V^{-} \]\[ I = \frac{V^{+} - V^{-}}{\cO{Z_0}} \]</div>
       <p>급전선 끝에서 V / I는 안테나의 임피던스 Z<sub>L</sub>이어야 합니다.</p>
       <div class="math">\[ \cZ{Z_L} = \cO{Z_0}\,\frac{V^{+} + V^{-}}{V^{+} - V^{-}} \]</div>
       <p>반사파와 진행파의 비를 반사계수 \(\cG{\Gamma} = V^{-}/V^{+}\)로 두고 분자와 분모를 V⁺로 나누어 정리하면 다음과 같습니다.</p>
-      <div class="math">\[ \cZ{Z_L} = \cO{Z_0}\,\frac{1+\cG{\Gamma}}{1-\cG{\Gamma}} \qquad\Longrightarrow\qquad \cG{\Gamma} = \frac{\cZ{Z_L} - \cO{Z_0}}{\cZ{Z_L} + \cO{Z_0}} \]</div>
+      <div class="math">\[ \cZ{Z_L} = \cO{Z_0}\,\frac{1+\cG{\Gamma}}{1-\cG{\Gamma}} \]\[ \Longrightarrow\; \cG{\Gamma} = \frac{\cZ{Z_L} - \cO{Z_0}}{\cZ{Z_L} + \cO{Z_0}} \]</div>
       <p>Γ도 복소수, 즉 화살표입니다. 길이 |Γ|는 반사파가 진행파의 몇 배인지, 각도는 반사될 때 위상이 얼마나 바뀌는지를 나타냅니다. 몇 가지 경우를 넣어 보면 이렇습니다.</p>
     </div>
     <div class="table-wrap">
@@ -369,9 +385,9 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>4장의 최대와 최소를 나누면 SWR입니다.</p>
-      <div class="math">\[ \text{SWR} = \frac{V_{\max}}{V_{\min}} = \frac{1+|\cG{\Gamma}|}{1-|\cG{\Gamma}|} \qquad\Longleftrightarrow\qquad |\cG{\Gamma}| = \frac{\text{SWR}-1}{\text{SWR}+1} \]</div>
+      <div class="math">\[ \text{SWR} = \frac{V_{\max}}{V_{\min}} = \frac{1+|\cG{\Gamma}|}{1-|\cG{\Gamma}|} \]\[ \Longleftrightarrow\; |\cG{\Gamma}| = \frac{\text{SWR}-1}{\text{SWR}+1} \]</div>
       <p>|Γ|는 0에서 1 사이이므로 SWR은 1에서 무한대 사이입니다. 최대를 최소로 나눈 값이라 1보다 작아질 수 없습니다. 전력은 전압의 제곱에 비례하므로 반사 전력의 비율은 |Γ|²입니다.</p>
-      <div class="math">\[ \frac{P_{\text{반사}}}{P_{\text{진행}}} = |\cG{\Gamma}|^{2}, \qquad \text{RL} = -20\log_{10}|\cG{\Gamma}|\ \ [\text{dB}] \]</div>
+      <div class="math">\[ \frac{P_{\text{반사}}}{P_{\text{진행}}} = |\cG{\Gamma}|^{2} \]\[ \text{RL} = -20\log_{10}|\cG{\Gamma}|\ \ [\text{dB}] \]</div>
     </div>
     <div class="table-wrap">
       <table>
@@ -406,7 +422,7 @@ window.MathJax = {
     <p class="ask">안테나가 공진하면 SWR은 항상 1일까?</p>
     <div class="prose">
       <p>1편에서 공진은 리액턴스가 상쇄되어 X = 0이 되는 상태였습니다. 공진한 안테나의 임피던스는 실수 R입니다. 그런데 Γ = 0이 되려면 X = 0에 더해 <strong>R = Z₀</strong>여야 합니다. 공진 상태에서 Γ와 SWR은 다음과 같습니다.</p>
-      <div class="math">\[ \cG{\Gamma} = \frac{\cR{R} - \cO{Z_0}}{\cR{R} + \cO{Z_0}}, \qquad \text{SWR} = \frac{\cR{R}}{\cO{Z_0}} \ \text{또는}\ \frac{\cO{Z_0}}{\cR{R}}\ \ (\text{1 이상인 쪽}) \]</div>
+      <div class="math">\[ \cG{\Gamma} = \frac{\cR{R} - \cO{Z_0}}{\cR{R} + \cO{Z_0}} \]\[ \text{SWR} = \frac{\cR{R}}{\cO{Z_0}} \ \text{또는}\ \frac{\cO{Z_0}}{\cR{R}}\ \ (\text{1 이상인 쪽}) \]</div>
       <p>예를 들어 완전한 접지 위의 1/4파장 버티컬은 공진할 때 약 36 Ω이므로, 50 Ω 급전선에서 SWR은 50/36 ≈ 1.4입니다. 공진했지만 SWR이 1은 아닙니다. 실제 설치에서는 지면 손실과 라디얼 수에 따라 급전점 저항이 이보다 높아져, 오히려 50 Ω에 가까워지기도 합니다.</p>
       <p>안테나 튜너(정합 회로)는 그래서 두 가지 일을 합니다. 남은 리액턴스를 반대 부호의 리액턴스로 상쇄하고(1편의 공진과 같은 일), 저항을 Z₀로 변환합니다. 실제 튜너는 코일과 콘덴서의 조합으로 두 일을 한 번에 하지만, 아래 그림은 이해하기 쉽게 두 단계로 나누었습니다.</p>
     </div>
@@ -785,6 +801,28 @@ window.MathJax = {
 })();
 </script>
 <script>
+(function(){
+  /* on narrow screens, turn tables that would overflow into stacked cards */
+  const tables = [...document.querySelectorAll('.table-wrap table')];
+  tables.forEach(t => {
+    const heads = [...t.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => { if (heads[i]) td.setAttribute('data-label', heads[i]); }));
+  });
+  function check(){
+    tables.forEach(t => {
+      t.classList.remove('stack');
+      const wrap = t.closest('.table-wrap');
+      if (wrap && t.scrollWidth > wrap.clientWidth + 2) t.classList.add('stack');
+    });
+  }
+  let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(check, 150); });
+  check();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(check);
+  window.addEventListener('load', () => { check(); setTimeout(check, 1500); });
+  if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(check);
+})();
+</script>
+<script>
 window.NARR = [
 ["hero","h1",0,"무선 공식, 수학으로 보기. 2편, 에스더블유알은 무엇을 재는 걸까."],
 ["hero",".big",0,"맨 위의 식은 두 개입니다. 에스더블유알은, 1 더하기 감마의 크기, 나누기 1 빼기 감마의 크기. 그리고 반사계수 감마는, 제트 엘 빼기 제트 제로, 나누기 제트 엘 더하기 제트 제로. 송신기와 안테나 사이에서 가장 자주 확인하는 숫자가 에스더블유알입니다."],
@@ -968,11 +1006,16 @@ window.NARR = [
     active = el;
     if (el){
       el.classList.add('narr-on');
+      const r = el.getBoundingClientRect();
       if (emb()){
-        const r = el.getBoundingClientRect();
-        const y = r.top + window.scrollY + Math.min(r.height / 2, 220);
+        const v = window.__embedView, H = v && v.height ? v.height : window.innerHeight;
+        const off = Math.max(56, H * 0.1);
+        const y = r.top + window.scrollY - off + H / 2;
         try { window.parent.postMessage({type: 'antenna-types:scrollto', y: y, smooth: !reduce}, '*'); } catch(e){}
-      } else el.scrollIntoView({block: 'center', behavior: reduce ? 'auto' : 'smooth'});
+      } else {
+        const off = Math.max(56, window.innerHeight * 0.1);
+        window.scrollTo({top: Math.max(0, r.top + window.scrollY - off), behavior: reduce ? 'auto' : 'smooth'});
+      }
     }
   }
   function updateBar(){

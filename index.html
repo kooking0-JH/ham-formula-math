@@ -148,6 +148,22 @@ body.narr-open{padding-bottom:120px}
 .unsup-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .btnlink{display:inline-flex;align-items:center;padding:8px 14px;border-radius:6px;background:var(--btn);color:var(--bg);font-weight:600;font-size:14px;text-decoration:none;box-shadow:0 2px 0 var(--btn-shadow)}
 .btnlink:hover{background:var(--btn-hover)}
+table.stack thead{display:none}
+table.stack,table.stack tbody{display:block}
+table.stack tr{display:block;margin-bottom:10px;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--screen)}
+table.stack td{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:4px 0;border:0;text-align:right;white-space:normal}
+table.stack td::before{content:attr(data-label);flex:none;max-width:45%;color:var(--muted);font-size:13px;font-weight:400;text-align:left}
+table.stack td:first-child{justify-content:flex-start;font-weight:700;text-align:left}
+table.stack td:first-child::before{content:none}
+@media (max-width:560px){
+  .narr-bar{gap:4px 8px;padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px))}
+  .narr-bar .nb-info{flex-basis:100%;justify-content:center;font-size:12px;line-height:1.2}
+  .nb-ctrl{gap:6px;flex-wrap:nowrap}
+  .nb-ctrl button{min-width:36px;padding:6px 8px}
+  .nb-rate{font-size:0;gap:0}
+  .nb-rate select{font-size:13px;padding:2px 4px}
+  body.narr-open{padding-bottom:84px}
+}
 .narr-bar.emb{position:absolute;bottom:auto;top:0}
 .next{padding:20px;border:1px dashed var(--muted);border-radius:6px;display:grid;gap:8px;color:var(--soft)}
 footer{padding-block:32px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px}
@@ -214,7 +230,7 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>먼저 각도를 재는 단위부터 정합니다. 각도로 볼 때 π는 반 바퀴(180°), 2π는 한 바퀴(360°)입니다.</p>
-      <div class="math">\[ \cP{\pi} = 180^\circ, \qquad \cP{2\pi} = 360^\circ \]</div>
+      <div class="math">\[ \cP{\pi} = 180^\circ \]\[ \cP{2\pi} = 360^\circ \]</div>
       <p>도(°) 대신 π 단위를 쓰는 이유는 반지름이 1인 원에서 <strong>호의 길이와 회전각이 같은 값</strong>이 되기 때문입니다. 이 단위를 라디안이라고 합니다. 아래에서 각도를 바꾸면 원호의 길이와 막대의 길이가 항상 같습니다. 이 성질은 3장에서 다시 쓰입니다.</p>
     </div>
     <div class="stage">
@@ -244,7 +260,7 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>회로 계산에 필요한 것은 회전수보다 <strong>1초 동안 돈 각도</strong>입니다. 회전수 f에 1회전의 각도 2π를 곱하면 초당 회전각, 즉 각주파수 ω가 됩니다.</p>
-      <div class="math">\[ \cW{\omega} = \cP{2\pi}\,\cF{f} \qquad\qquad \cF{f} = 7\ \text{MHz} \;\Longrightarrow\; \cW{\omega} \approx 4.40\times10^{7}\ \text{rad/s} \]</div>
+      <div class="math">\[ \cW{\omega} = \cP{2\pi}\,\cF{f} \]\[ \cF{f} = 7\ \text{MHz} \;\Longrightarrow\; \cW{\omega} \approx 4.40\times10^{7}\ \text{rad/s} \]</div>
       <p>시각 t에서 화살표가 가리키는 각도는 \(\cW{\omega} t\)입니다.</p>
     </div>
     <div class="answer" style="--k:var(--pi)">2π는 회전수(f)를 각도(ω)로 바꾸는 환산 계수입니다.</div>
@@ -261,7 +277,7 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>허수 단위를 곱하면 복소수의 <strong>크기는 그대로이고 방향만 90° 회전</strong>합니다. −1을 곱하는 것이 반 회전(180°)이므로, 두 번 곱해서 −1이 되는 j는 그 절반인 90°입니다.</p>
-      <div class="math">\[ \cJ{j}\times\cJ{j} = -1 \qquad (90^\circ + 90^\circ = 180^\circ) \]</div>
+      <div class="math">\[ \cJ{j}\times\cJ{j} = -1 \]\[ (90^\circ + 90^\circ = 180^\circ) \]</div>
       <p>j를 곱하면 반시계 방향으로 90°, j로 나누면 시계 방향으로 90° 회전합니다.</p>
     </div>
     <div class="stage">
@@ -347,7 +363,7 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>콘덴서의 분모에 있는 j는 분자와 분모에 j를 곱해 정리하면 −j가 됩니다. j로 나누는 것은 −90° 회전입니다.</p>
-      <div class="math">\[ \frac{1}{\cJ{j}} = \frac{\cJ{j}}{\cJ{j}\cdot\cJ{j}} = -\cJ{j} \qquad\Longrightarrow\qquad Z_{\cC{C}} = -\cJ{j}\,\frac{1}{\cW{\omega}\cC{C}} \]</div>
+      <div class="math">\[ \frac{1}{\cJ{j}} = \frac{\cJ{j}}{\cJ{j}\cdot\cJ{j}} = -\cJ{j} \]\[ \Longrightarrow\; Z_{\cC{C}} = -\cJ{j}\,\frac{1}{\cW{\omega}\cC{C}} \]</div>
       <p>임피던스 Z = V / I에서 j가 붙은 부분의 크기를 리액턴스 X라고 부릅니다. 코일은 \(X_{\cL{L}} = \cW{\omega}\cL{L}\), 콘덴서는 \(X_{\cC{C}} = 1/(\cW{\omega}\cC{C})\)입니다. 이 글에서 X<sub>C</sub>는 크기로 썼습니다. 부호까지 포함한 콘덴서의 리액턴스는 \(-1/(\cW{\omega}\cC{C})\)이며, 2편에서는 이 부호 있는 값을 씁니다.</p>
     </div>
     <div class="answer" style="--k:var(--l)">전류의 변화율이 전압을 정하면(L) +j, 전압의 변화율이 전류를 정하면(C) −j입니다.</div>
@@ -401,8 +417,8 @@ window.MathJax = {
     </div>
     <div class="math">
       \[ \cW{\omega}\cL{L} = \frac{1}{\cW{\omega}\cC{C}} \]
-      \[ \cW{\omega}^{2}\,\cL{L}\cC{C} = 1 \qquad\Longrightarrow\qquad \cW{\omega} = \frac{1}{\sqrt{\cL{L}\cC{C}}} \]
-      \[ \cP{2\pi}\cF{f_0} = \frac{1}{\sqrt{\cL{L}\cC{C}}} \qquad\Longrightarrow\qquad \boxed{\;\cF{f_0} = \frac{1}{\cP{2\pi}\sqrt{\cL{L}\,\cC{C}}}\;} \]
+      \[ \cW{\omega}^{2}\,\cL{L}\cC{C} = 1 \]\[ \Longrightarrow\; \cW{\omega} = \frac{1}{\sqrt{\cL{L}\cC{C}}} \]
+      \[ \cP{2\pi}\cF{f_0} = \frac{1}{\sqrt{\cL{L}\cC{C}}} \]\[ \Longrightarrow\; \boxed{\;\cF{f_0} = \frac{1}{\cP{2\pi}\sqrt{\cL{L}\,\cC{C}}}\;} \]
     </div>
     <div class="prose">
       <p>처음의 세 질문에 답할 수 있습니다.</p>
@@ -441,7 +457,7 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>전자기파는 자유공간에서 초당 약 \(3\times10^{8}\) m를 진행합니다. 회전 벡터가 1회전하는 동안(1주기) 파가 진행한 거리가 파장 λ입니다.</p>
-      <div class="math">\[ \lambda = \frac{c}{\cF{f}} \qquad\Longrightarrow\qquad \lambda[\text{m}] \approx \frac{300}{\cF{f}[\text{MHz}]} \]</div>
+      <div class="math">\[ \lambda = \frac{c}{\cF{f}} \]\[ \Longrightarrow\; \lambda[\text{m}] \approx \frac{300}{\cF{f}[\text{MHz}]} \]</div>
     </div>
     <div class="stage">
       <div class="controls">
@@ -895,6 +911,28 @@ window.MathJax = {
 })();
 </script>
 <script>
+(function(){
+  /* on narrow screens, turn tables that would overflow into stacked cards */
+  const tables = [...document.querySelectorAll('.table-wrap table')];
+  tables.forEach(t => {
+    const heads = [...t.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => { if (heads[i]) td.setAttribute('data-label', heads[i]); }));
+  });
+  function check(){
+    tables.forEach(t => {
+      t.classList.remove('stack');
+      const wrap = t.closest('.table-wrap');
+      if (wrap && t.scrollWidth > wrap.clientWidth + 2) t.classList.add('stack');
+    });
+  }
+  let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(check, 150); });
+  check();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(check);
+  window.addEventListener('load', () => { check(); setTimeout(check, 1500); });
+  if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(check);
+})();
+</script>
+<script>
 window.NARR = [
 ["hero","h1",0,"무선 공식, 수학으로 보기. 1편, 공진 주파수 공식은 어디서 왔을까."],
 ["hero",".big",0,"화면 맨 위의 식은 공진 주파수 공식입니다. 에프 제로는, 1 나누기 2파이 루트 엘씨. 수신기의 동조, 안테나 튜너의 정합, 필터의 통과 대역이 모두 이 식으로 정해집니다."],
@@ -1081,11 +1119,16 @@ window.NARR = [
     active = el;
     if (el){
       el.classList.add('narr-on');
+      const r = el.getBoundingClientRect();
       if (emb()){
-        const r = el.getBoundingClientRect();
-        const y = r.top + window.scrollY + Math.min(r.height / 2, 220);
+        const v = window.__embedView, H = v && v.height ? v.height : window.innerHeight;
+        const off = Math.max(56, H * 0.1);
+        const y = r.top + window.scrollY - off + H / 2;
         try { window.parent.postMessage({type: 'antenna-types:scrollto', y: y, smooth: !reduce}, '*'); } catch(e){}
-      } else el.scrollIntoView({block: 'center', behavior: reduce ? 'auto' : 'smooth'});
+      } else {
+        const off = Math.max(56, window.innerHeight * 0.1);
+        window.scrollTo({top: Math.max(0, r.top + window.scrollY - off), behavior: reduce ? 'auto' : 'smooth'});
+      }
     }
   }
   function updateBar(){
