@@ -317,10 +317,10 @@ window.MathJax = {
         <button type="button" id="pauseD" class="alt">멈춤</button>
         <span class="read" id="readD"></span>
       </div>
-      <dl class="guide"><div><dt>조작</dt><dd>슬라이더로 화살표의 각속도 ω를 바꿉니다.</dd></div><div><dt>관찰</dt><dd>보라색 속도 화살표의 길이는 ω에 따라 바뀌지만, 검은 화살표와 이루는 각은 언제나 90°입니다. 오른쪽에서는 보라 파형이 검은 파형보다 1/4주기 먼저 마루에 도달합니다.</dd></div><div><dt>의미</dt><dd>변화율은 크기가 ω배, 방향이 +90°입니다. 즉 ×jω입니다.</dd></div></dl>
+      <dl class="guide"><div><dt>조작</dt><dd>슬라이더로 화살표의 각속도 ω를 바꿉니다.</dd></div><div><dt>관찰</dt><dd>보라색 속도 화살표의 길이는 ω에 따라 바뀌지만, 검은 화살표와 이루는 각은 언제나 90°입니다. 파형 그림(좁은 화면에서는 아래쪽)에서는 보라 파형이 검은 파형보다 1/4주기 먼저 마루에 도달합니다.</dd></div><div><dt>의미</dt><dd>변화율은 크기가 ω배, 방향이 +90°입니다. 즉 ×jω입니다.</dd></div></dl>
     </div>
     <div class="prose">
-      <p>보라색 속도 화살표를 원점으로 옮겨 보면(점선), 원래 화살표를 90° 회전시키고 ω배 한 것과 같습니다. 오른쪽 파형에서도 속도의 파형이 위치의 파형보다 1/4주기(90°) 먼저 마루에 도달합니다. 90° 회전은 j, ω배는 ω이므로</p>
+      <p>보라색 속도 화살표를 원점으로 옮겨 보면(점선), 원래 화살표를 90° 회전시키고 ω배 한 것과 같습니다. 파형 그림에서도 속도의 파형이 위치의 파형보다 1/4주기(90°) 먼저 마루에 도달합니다. 90° 회전은 j, ω배는 ω이므로</p>
       <div class="math">\[ \frac{d}{dt}\,e^{\cJ{j}\cW{\omega} t} = \cJ{j}\cW{\omega}\; e^{\cJ{j}\cW{\omega} t} \]</div>
     </div>
     <div class="answer" style="--k:var(--j)">회전 벡터를 미분하면 jω가 곱해집니다.</div>
@@ -625,15 +625,16 @@ window.MathJax = {
   /* ---------- D: velocity of rotating arrow ---------- */
   const cvD = document.getElementById('cvD'), readD = document.getElementById('readD');
   function drawD(){
-    const h = 280;
+    const W0 = cvD.parentElement.clientWidth || 300;
+    const stack = W0 < 560;           // phone: waveform goes below the circle instead of beside it
+    const h = stack ? 470 : 280;
     const {g, w} = fit(cvD, h);
     const om = wD.value/100;
-    const narrow = w < 520;
-    const R = narrow ? 48 : 58;
-    const cx = 26 + R + 60, cy = h/2 + 6;
+    const R = stack ? 52 : 58;
+    const cx = stack ? w/2 : 26 + R + 60, cy = stack ? 150 : h/2 + 6;
     g.strokeStyle = COL.line; g.lineWidth = 1;
     g.beginPath(); g.arc(cx,cy,R,0,TAU); g.stroke();
-    g.beginPath(); g.moveTo(cx-R-70,cy); g.lineTo(w-12,cy); g.moveTo(cx,cy-R-70); g.lineTo(cx,cy+R+70); g.stroke();
+    g.beginPath(); g.moveTo(stack ? 12 : cx-R-70, cy); g.lineTo(w-12,cy); g.moveTo(cx,cy-R-70); g.lineTo(cx,cy+R+(stack ? 30 : 70)); g.stroke();
     const px = cx + R*Math.cos(phiD), py = cy - R*Math.sin(phiD);
     const vx = -R*om*Math.sin(phiD), vy = -R*om*Math.cos(phiD);
     g.setLineDash([4,4]); arrow(g, cx, cy, cx+vx, cy+vy, COL.j, 2); g.setLineDash([]);
@@ -641,20 +642,33 @@ window.MathJax = {
     arrow(g, px, py, px+vx, py+vy, COL.j, 3);
     text(g, '위치', px + (px>cx?8:-8), py + (py<cy?-8:18), COL.fg, '600 13px '+SANS, px>cx?'left':'right');
     text(g, '속도', px+vx + (vx>0?8:-8), py+vy + (vy<0?-6:16), COL.j, '600 13px '+SANS, vx>0?'left':'right');
-    const xs = cx + R + 80;
-    if (w - xs > 120){
-      const lamPx = 170;
+    const lamPx = 170;
+    const waves = (xs, x1, wy, dots) => {
+      g.strokeStyle = COL.line; g.lineWidth = 1; g.beginPath(); g.moveTo(xs, wy); g.lineTo(x1, wy); g.stroke();
       g.strokeStyle = COL.fg; g.lineWidth = 2; g.beginPath();
-      for (let x = xs; x <= w-14; x += 2){ const y = cy - R*Math.sin(phiD - TAU*(x-xs)/lamPx); x===xs?g.moveTo(x,y):g.lineTo(x,y); }
+      for (let x = xs; x <= x1; x += 2){ const y = wy - R*Math.sin(phiD - TAU*(x-xs)/lamPx); x===xs?g.moveTo(x,y):g.lineTo(x,y); }
       g.stroke();
       g.strokeStyle = COL.j; g.lineWidth = 2; g.beginPath();
-      for (let x = xs; x <= w-14; x += 2){ const y = cy - R*om*Math.sin(phiD + Math.PI/2 - TAU*(x-xs)/lamPx); x===xs?g.moveTo(x,y):g.lineTo(x,y); }
+      for (let x = xs; x <= x1; x += 2){ const y = wy - R*om*Math.sin(phiD + Math.PI/2 - TAU*(x-xs)/lamPx); x===xs?g.moveTo(x,y):g.lineTo(x,y); }
       g.stroke();
-      g.setLineDash([3,4]); g.strokeStyle = COL.muted; g.lineWidth = 1;
-      g.beginPath(); g.moveTo(px,py); g.lineTo(xs,py); g.moveTo(cx+vx,cy+vy); g.lineTo(xs,cy+vy); g.stroke(); g.setLineDash([]);
-      text(g, '세로 투영', xs, 18, COL.muted, '13px '+SANS);
+      if (dots){ g.fillStyle = COL.fg; g.beginPath(); g.arc(xs, wy - R*Math.sin(phiD), 4, 0, TAU); g.fill(); g.fillStyle = COL.j; g.beginPath(); g.arc(xs, wy - R*om*Math.cos(phiD), 4, 0, TAU); g.fill(); }
+    };
+    if (stack){
+      const wy = 360;
+      text(g, '아래: 세로 투영의 시간 파형', 14, 262, COL.muted, '13px '+SANS);
+      waves(22, w-14, wy, true);
+      text(g, '검은색: 위치   보라: 변화율(속도)', 14, h-28, COL.muted, '12.5px '+SANS);
+      text(g, '점선: 속도를 원점으로 옮긴 것', 14, h-10, COL.muted, '12.5px '+SANS);
+    } else {
+      const xs = cx + R + 80;
+      if (w - xs > 120){
+        waves(xs, w-14, cy, false);
+        g.setLineDash([3,4]); g.strokeStyle = COL.muted; g.lineWidth = 1;
+        g.beginPath(); g.moveTo(px,py); g.lineTo(xs,py); g.moveTo(cx+vx,cy+vy); g.lineTo(xs,cy+vy); g.stroke(); g.setLineDash([]);
+        text(g, '세로 투영', xs, 18, COL.muted, '13px '+SANS);
+      }
+      text(g, '검은색: 위치   보라: 변화율(속도)   점선: 속도를 원점으로 옮긴 것', 14, h-12, COL.muted, '12.5px '+SANS);
     }
-    text(g, '검은색: 위치   보라: 변화율(속도)   점선: 속도를 원점으로 옮긴 것', 14, h-12, COL.muted, '12.5px '+SANS);
     tag(g, '|속도| = ω × 반지름 = '+fmt(om,2), w-14, 22, COL.j, '600 14px '+SANS, 'right');
     readD.textContent = 'ω = ' + fmt(om,2) + ' rad/s · 속도 = 위치 × jω (90° 앞, ' + fmt(om,2) + '배)';
   }
@@ -957,7 +971,7 @@ window.NARR = [
 
 ["s3","h2",0,"3장. 회전하는 화살표의 변화율. 이 장이 연작 전체의 핵심입니다. 질문은, 회전하는 화살표는 매 순간 어느 방향으로, 얼마나 빠르게 변하는가입니다."],
 ["s3",".prose",0,"변화율은 1초 동안 값이 얼마나 바뀌는지를 뜻합니다. 화살표 끝은 원을 따라 움직이니까, 변화율은 그 점의 속도입니다. 방향부터 보면, 원 위의 점은 언제나 접선 방향으로 움직이고, 접선은 반지름과 수직입니다. 그래서 속도는 화살표보다 항상 90도 앞선 방향을 가리킵니다. 크기는 어떨까요. 1장에서 반지름 1인 원에서는 호의 길이와 회전각이 같다고 했습니다. 1초에 오메가 라디안 회전하면 끝점은 1초에 길이 오메가만큼 움직입니다. 그래서 속도의 크기는 정확히 오메가 배입니다."],
-["s3",".stage",0,"그림에서 보라색이 속도 화살표입니다. 오메가 슬라이더를 움직이면 보라 화살표의 길이는 바뀌지만, 검은 화살표와 이루는 각은 언제나 90도입니다. 오른쪽 파형에서도 보라 파형이 검은 파형보다 4분의 1 주기 먼저 마루에 도달합니다."],
+["s3",".stage",0,"그림에서 보라색이 속도 화살표입니다. 오메가 슬라이더를 움직이면 보라 화살표의 길이는 바뀌지만, 검은 화살표와 이루는 각은 언제나 90도입니다. 파형 그림에서도 보라 파형이 검은 파형보다 4분의 1 주기 먼저 마루에 도달합니다."],
 ["s3",".prose",1,"90도 회전은 제이, 오메가 배는 오메가입니다. 그래서 e의 제이 오메가 티 승을 미분하면, 제이 오메가 곱하기 e의 제이 오메가 티 승이 됩니다."],
 ["s3",".answer",0,"3장의 결론입니다. 회전 벡터를 미분하면 제이 오메가가 곱해집니다. 다음 장에서 이 한 줄이 코일과 콘덴서를 설명합니다."],
 
