@@ -1002,7 +1002,7 @@ window.NARR = [
   const secEl = $('.nb-sec'), posEl = $('.nb-pos'), playBtn = $('.nb-play'), rateSel = $('#narrRate'), msgEl = $('.nb-msg');
 
   /* ---------- engine ---------- */
-  let i = 0, k = 0, gen = 0, playing = false, onlySec = null, active = null;
+  let i = 0, k = 0, gen = 0, playing = false, onlySec = null, active = null, curUtter = null, errRun = 0;
   function setActive(el){
     if (active) active.classList.remove('narr-on');
     active = el;
@@ -1043,11 +1043,18 @@ window.NARR = [
     u.lang = 'ko-KR';
     if (voice) u.voice = voice;
     u.rate = +rateSel.value;
-    u.onend = () => { if (g !== gen) return; k++; speakPart(g); };
-    u.onerror = e => { if (g !== gen) return; if (e && (e.error === 'interrupted' || e.error === 'canceled')) return; k++; speakPart(g); };
+    curUtter = u;   /* 크롬 계열에서 읽는 도중 객체가 치워져 onend가 사라지는 일을 막음 */
+    u.onend = () => { if (g !== gen) return; errRun = 0; k++; speakPart(g); };
+    u.onerror = e => {
+      if (g !== gen) return;
+      if (e && (e.error === 'interrupted' || e.error === 'canceled')) return;
+      /* 음성 엔진이 계속 실패하면 소리 없이 끝까지 넘어가지 않도록 멈추고 알림 */
+      if (++errRun >= 3){ errRun = 0; pause(); showMsg('이 브라우저에서 음성을 재생하지 못했습니다. 기기의 음성(TTS) 설정을 확인하거나 크롬·엣지·사파리에서 열어 보십시오.'); return; }
+      k++; speakPart(g);
+    };
     S.speak(u);
   }
-  function go(){ gen++; try { S.cancel(); } catch(e){} playing = true; updateBar(); speakPart(gen); }
+  function go(){ gen++; errRun = 0; try { S.cancel(); } catch(e){} playing = true; showMsg(''); updateBar(); speakPart(gen); }
   function start(idx, sec){
     if (idx < 0) return;
     pickVoice();
@@ -1073,7 +1080,15 @@ window.NARR = [
   }
 
   allBtn.addEventListener('click', () => start(0, null));
-  playBtn.addEventListener('click', () => { if (playing) pause(); else { if (!active) { setActive(items[i].el); } go(); } });
+  playBtn.addEventListener('click', () => {
+    if (playing){ pause(); return; }
+    if (!active){
+      /* 끝까지 읽은 뒤 다시 누르면: 듣던 범위(단원 또는 전체)의 처음부터 */
+      if (k >= items[i].parts.length){ const s0 = onlySec ? items.findIndex(x => x.sec === onlySec) : 0; i = Math.max(0, s0); k = 0; }
+      setActive(items[i].el);
+    }
+    go();
+  });
   $('.nb-prev').addEventListener('click', () => jump(k > 0 ? 0 : -1));
   $('.nb-next').addEventListener('click', () => jump(1));
   $('.nb-close').addEventListener('click', close);
